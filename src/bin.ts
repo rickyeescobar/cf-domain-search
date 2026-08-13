@@ -6,15 +6,23 @@
  * keeping the published bundle dependency-free.
  */
 import { NodeRuntime, NodeServices } from "@effect/platform-node"
-import { Effect, Layer } from "effect"
+import { ConfigProvider, Effect, Layer } from "effect"
 import { Command } from "effect/unstable/cli"
 import { FetchHttpClient } from "effect/unstable/http"
 import { cfdomains } from "./Cli.ts"
 import { Cloudflare } from "./Cloudflare.ts"
 import { CredentialStore } from "./Credentials.ts"
 
+// Let every Config read (including flag fallbacks) see a `.env` in the
+// working directory, with real environment variables taking precedence.
+const DotEnvLayer = ConfigProvider.layerAdd(
+  ConfigProvider.fromDotEnv().pipe(
+    Effect.orElseSucceed(() => ConfigProvider.fromDotEnvContents(""))
+  )
+)
+
 const MainLayer = Layer.provideMerge(
-  Layer.mergeAll(Cloudflare.layer, CredentialStore.layer),
+  Layer.mergeAll(Cloudflare.layer, CredentialStore.layer, DotEnvLayer),
   Layer.mergeAll(NodeServices.layer, FetchHttpClient.layer)
 )
 

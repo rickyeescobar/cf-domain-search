@@ -27,7 +27,7 @@ export const fetchLive: Effect.Effect<
     Effect.gen(function*() {
       const { yellow } = yield* Style
       yield* Console.error(
-        yellow(`warning: could not fetch live TLD list (${error}); using built-in list`)
+        yellow(`warning: could not fetch live TLD list (${error.message}); using built-in list`)
       )
       return []
     })

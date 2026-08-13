@@ -2,7 +2,7 @@
  * The `cfdomains` command: check a name's availability and price across every
  * Cloudflare Registrar TLD, plus the `setup` subcommand.
  */
-import { Array as Arr, Config, Console, Data, Effect, Option, Redacted, Result, Runtime, Schema } from "effect"
+import { Array as Arr, Config, Console, Data, Effect, Option, Redacted, Ref, Result, Runtime, Schema } from "effect"
 import { Argument, CliError, Command, Flag, GlobalFlag } from "effect/unstable/cli"
 import { CheckedDomain, Cloudflare, type CloudflareError } from "./Cloudflare.ts"
 import { CredentialStore, type Credentials } from "./Credentials.ts"
@@ -108,12 +108,12 @@ const resolveCredentials = Effect.fn(function*(
 ) {
   const store = yield* CredentialStore
   const stored = yield* store.load
-  const token = Option.getOrUndefined(flagToken)
-    ?? Option.getOrUndefined(Option.map(stored, (c) => c.token))
-  const accountId = Option.getOrUndefined(flagAccountId)
-    ?? Option.getOrUndefined(Option.map(stored, (c) => c.accountId))
-  if (token !== undefined && accountId !== undefined) {
-    return { token, accountId } satisfies Credentials
+  const merged = Option.all({
+    token: Option.orElse(flagToken, () => Option.map(stored, (c) => c.token)),
+    accountId: Option.orElse(flagAccountId, () => Option.map(stored, (c) => c.accountId))
+  })
+  if (Option.isSome(merged)) {
+    return merged.value satisfies Credentials
   }
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     return yield* missingCredentials
@@ -147,7 +147,7 @@ const sweep = Effect.fn(function*(
   showProgress: boolean
 ) {
   const cloudflare = yield* Cloudflare
-  let done = 0
+  const done = yield* Ref.make(0)
 
   const outcomes = yield* Effect.forEach(
     Arr.chunksOf(targets, BATCH_SIZE),
@@ -156,10 +156,14 @@ const sweep = Effect.fn(function*(
         Effect.result,
         Effect.map((result) => ({ batch, result })),
         Effect.tap(() =>
-          Effect.sync(() => {
-            done += batch.length
-            if (showProgress) process.stderr.write(`\r  ${progressBar(done, targets.length)}`)
-          })
+          showProgress
+            ? Ref.updateAndGet(done, (count) => count + batch.length).pipe(
+              Effect.flatMap((count) =>
+                // Progress goes to stderr so piped stdout stays clean.
+                Effect.sync(() => process.stderr.write(`\r  ${progressBar(count, targets.length)}`))
+              )
+            )
+            : Effect.void
         )
       ),
     { concurrency: CONCURRENCY }

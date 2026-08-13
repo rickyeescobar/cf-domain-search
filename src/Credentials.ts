@@ -3,9 +3,10 @@
  *
  * This store resolves, in priority order:
  *
- *   1. `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` environment variables
- *   2. a `.env` file in the working directory (never overrides real env vars)
- *   3. the config saved by `cfdomains setup` (`~/.config/cf-domain-search/config.json`)
+ *   1. `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` via Config — real
+ *      environment variables first, then a `.env` in the working directory
+ *      (the ConfigProvider layer in bin.ts adds the `.env` fallback)
+ *   2. the config saved by `cfdomains setup` (`~/.config/cf-domain-search/config.json`)
  *
  * The `--token` / `--account-id` flags (see Cli.ts) take precedence over all
  * of these, and the interactive wizard is the last resort.
@@ -25,19 +26,6 @@ const StoredConfig = Schema.Struct({
 })
 
 const decodeStoredConfig = Schema.decodeUnknownEffect(Schema.fromJsonString(StoredConfig))
-
-/** Parse `.env` lines of the form `KEY=value`, tolerating quotes and whitespace. */
-const parseDotEnv = (text: string): ReadonlyMap<string, string> => {
-  const values = new Map<string, string>()
-  for (const line of text.split("\n")) {
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/)
-    if (match === null) continue
-    const [, key, raw] = match
-    if (key === undefined || raw === undefined) continue
-    values.set(key, raw.trim().replace(/^(["'])(.*)\1$/, "$2"))
-  }
-  return values
-}
 
 export class CredentialStore extends Context.Service<CredentialStore, {
   /** Credentials from the highest-priority source that provides them. */
@@ -59,35 +47,23 @@ export class CredentialStore extends Context.Service<CredentialStore, {
       )
       const configPath = path.join(configDir, "config.json")
 
-      const readIfExists = (file: string) =>
-        fs.readFileString(file).pipe(Effect.orElseSucceed(() => undefined))
+      const readStored = fs.readFileString(configPath).pipe(
+        Effect.flatMap(decodeStoredConfig),
+        Effect.orElseSucceed((): typeof StoredConfig.Type => ({}))
+      )
 
       const load = Effect.gen(function*() {
         const env = {
           token: yield* Config.option(Config.redacted("CLOUDFLARE_API_TOKEN")),
           accountId: yield* Config.option(Config.string("CLOUDFLARE_ACCOUNT_ID"))
         }
+        const stored = yield* readStored
 
-        const dotEnvText = yield* readIfExists(".env")
-        const dotEnv = dotEnvText === undefined ? new Map<string, string>() : parseDotEnv(dotEnvText)
-
-        const storedText = yield* readIfExists(configPath)
-        const stored: typeof StoredConfig.Type = storedText === undefined
-          ? {}
-          : yield* decodeStoredConfig(storedText).pipe(
-            Effect.orElseSucceed((): typeof StoredConfig.Type => ({}))
-          )
-
-        const fallbackToken = dotEnv.get("CLOUDFLARE_API_TOKEN") ?? stored.api_token
-        const token = Option.getOrUndefined(env.token)
-          ?? (fallbackToken !== undefined ? Redacted.make(fallbackToken) : undefined)
-        const accountId = Option.getOrUndefined(env.accountId)
-          ?? dotEnv.get("CLOUDFLARE_ACCOUNT_ID")
-          ?? stored.account_id
-
-        return token !== undefined && accountId !== undefined
-          ? Option.some<Credentials>({ token, accountId })
-          : Option.none<Credentials>()
+        return Option.all({
+          token: Option.orElse(env.token, () =>
+            Option.map(Option.fromUndefinedOr(stored.api_token), Redacted.make)),
+          accountId: Option.orElse(env.accountId, () => Option.fromUndefinedOr(stored.account_id))
+        })
       }).pipe(Effect.orDie)
 
       const save = (credentials: Credentials) =>
