@@ -3,6 +3,15 @@
   "version": "0.2.0",
   "description": "Check a name's availability and price across every Cloudflare Registrar TLD",
   "license": "MIT",
+  "author": "Ricardo Escobar",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rickyeescobar/cf-domain-search.git"
+  },
+  "homepage": "https://github.com/rickyeescobar/cf-domain-search#readme",
+  "bugs": {
+    "url": "https://github.com/rickyeescobar/cf-domain-search/issues"
+  },
   "type": "module",
   "bin": {
     "cf-domain-search": "dist/cfdom.js",
