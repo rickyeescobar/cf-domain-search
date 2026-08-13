@@ -128,6 +128,7 @@ searches.
 ```sh
 bun install        # also applies the effect-tsgo patch (prepare script)
 bun run check      # tsc 7 --noEmit with Effect diagnostics
+bun test           # offline suite: mock HttpClient, fake FileSystem, no network
 bun run build      # bundle src/bin.ts → dist/cfdomains.js (self-contained, no deps)
 ```
 
