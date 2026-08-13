@@ -11,9 +11,9 @@ import { Style } from "./Style.ts"
 
 const intro = ({ bold, dim, orange }: Style) => `
 ${orange("        ▄▄▄▄▄")}
-${orange("    ▄▄█████████▄▄")}            ${bold("cfdomains")}
+${orange("    ▄▄█████████▄▄")}
 ${orange("  ▄███████████████▄▄▄")}        ${dim("Cloudflare Registrar domain search")}
-${orange(" ▟█████████████████████▙")}
+${orange(" ▟█████")} ${bold("cfdomains")} ${orange("█████▙")}
 ${orange(" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀")}
 
 ${bold("Setup")}
