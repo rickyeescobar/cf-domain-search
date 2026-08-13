@@ -143,7 +143,7 @@ The README screenshots are generated from real output with
 
 `prepack` runs the typecheck and build, shipping `dist/` with bins `cf-domain-search` and
 `cfdomains`. Verify locally with `npm pack` and
-`npx --yes --package=./cf-domain-search-0.2.0.tgz cf-domain-search myname`, then
+`npx --yes --package=./cf-domain-search-0.2.1.tgz cf-domain-search myname`, then
 `npm publish`.
 
 ## License

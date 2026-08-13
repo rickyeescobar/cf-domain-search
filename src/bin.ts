@@ -27,7 +27,7 @@ const MainLayer = Layer.provideMerge(
 )
 
 cfdomains.pipe(
-  Command.run({ version: "0.2.0" }),
+  Command.run({ version: "0.2.1" }),
   Effect.provide(MainLayer),
   NodeRuntime.runMain
 )

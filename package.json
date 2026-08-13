@@ -1,6 +1,6 @@
 {
   "name": "cf-domain-search",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Check a name's availability and price across every Cloudflare Registrar TLD",
   "license": "MIT",
   "author": "Ricardo Escobar",
