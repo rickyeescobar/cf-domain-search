@@ -28,7 +28,8 @@
     "check": "tsc --noEmit",
     "prepack": "bun run check && bun run test && bun run build",
     "prepare": "effect-tsgo patch --typescript --no-oxlint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release": "bun scripts/release.ts"
   },
   "dependencies": {
     "@effect/platform-node": "4.0.0-rc.108",

@@ -139,12 +139,18 @@ bun run build      # bundle src/bin.ts → dist/cf-domain-search.js (self-contai
 The README screenshots are generated from real output with
 [ray.so](https://ray.so) via `scripts/screenshots.ts`.
 
-### Publishing
+### Releasing
 
-`prepack` runs the typecheck and build, shipping `dist/` with bins `cf-domain-search` and
-`cfdomains`. Verify locally with `npm pack` and
-`npx --yes --package=./cf-domain-search-0.2.1.tgz cf-domain-search myname`, then
-`npm publish`.
+```sh
+bun run release            # patch bump; also: minor, major, --dry-run
+```
+
+One command runs the whole loop: bump `package.json` (the CLI's `--version` reads it
+at build time), typecheck + tests, commit and push, `npm publish` (prompts for your
+npm OTP; `prepack` re-verifies and rebuilds), then tags `vX.Y.Z` and creates the
+GitHub release with generated notes. Re-running after a failed step resumes instead
+of double-bumping. The published tarball is `dist/` only, with bins
+`cf-domain-search` and `cfdomains`.
 
 ## License
 

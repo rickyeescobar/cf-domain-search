@@ -12,6 +12,7 @@ import { FetchHttpClient } from "effect/unstable/http"
 import { cfDomainSearch } from "./Cli.ts"
 import { Cloudflare } from "./Cloudflare.ts"
 import { CredentialStore } from "./Credentials.ts"
+import packageJson from "../package.json" with { type: "json" }
 
 // Let every Config read (including flag fallbacks) see a `.env` in the
 // working directory, with real environment variables taking precedence.
@@ -27,7 +28,7 @@ const MainLayer = Layer.provideMerge(
 )
 
 cfDomainSearch.pipe(
-  Command.run({ version: "0.2.1" }),
+  Command.run({ version: packageJson.version }),
   Effect.provide(MainLayer),
   NodeRuntime.runMain
 )
