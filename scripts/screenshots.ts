@@ -24,7 +24,7 @@ const shots: ReadonlyArray<Shot> = [
     file: "docs/fullsweep.png",
     title: "cfdomains",
     language: "shell",
-    width: 1060,
+    width: 1010,
     code: [
       "$ cfdomains malachi",
       "",
@@ -54,7 +54,7 @@ const shots: ReadonlyArray<Shot> = [
     file: "docs/sweep.png",
     title: "cfdomains",
     language: "shell",
-    width: 1060,
+    width: 1010,
     code: [
       "$ cfdomains malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
       "",
