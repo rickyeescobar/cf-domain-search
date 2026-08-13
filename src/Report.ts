@@ -52,21 +52,6 @@ const sparkline = (costs: ReadonlyArray<number>, buckets = 12): string => {
     .join("")
 }
 
-/** Rounded box; padding is computed from the unstyled text so ANSI codes don't skew it. */
-const box = (
-  content: ReadonlyArray<{ readonly plain: string; readonly styled: string }>,
-  frame: (line: string) => string
-): ReadonlyArray<string> => {
-  const inner = Math.max(...content.map((l) => l.plain.length))
-  return [
-    frame(`╭${"─".repeat(inner + 2)}╮`),
-    ...content.map((l) =>
-      `${frame("│")} ${l.styled}${" ".repeat(inner - l.plain.length)} ${frame("│")}`
-    ),
-    frame(`╰${"─".repeat(inner + 2)}╯`)
-  ]
-}
-
 const wrapList = (
   names: ReadonlyArray<string>,
   decorate: (line: string) => string,
@@ -180,29 +165,19 @@ export const render = (
   }
 
   const cheapest = available[0]
-  const stats = `available · ${taken.length} taken · ${unsupported.length} unsupported`
-  const summary = [{
-    plain: `${available.length} ${stats}`,
-    styled: `${bold(String(available.length))} ${stats}`
-  }]
-  if (cheapest !== undefined) {
-    const price = `${money(cheapest.pricing?.registration_cost)}/yr`
-    summary.push({
-      plain: `cheapest: ${cheapest.name} at ${price}`,
-      styled: `cheapest: ${bold(cheapest.name)} at ${price}`
-    })
-  }
+  lines.push("")
+  lines.push(
+    `${bold(String(available.length))} available · ${taken.length} taken · ` +
+      `${unsupported.length} unsupported` +
+      (cheapest !== undefined
+        ? ` · cheapest: ${bold(cheapest.name)} at ${money(cheapest.pricing?.registration_cost)}/yr`
+        : "")
+  )
   const costs = available.map(registrationCost).filter((cost) => Number.isFinite(cost))
   const sparks = costs.length >= 8 ? sparkline(costs) : ""
   if (sparks !== "") {
-    const range = `${money(Math.min(...costs))} – ${money(Math.max(...costs))}`
-    summary.push({
-      plain: `prices ${range}  ${sparks}`,
-      styled: `prices ${range}  ${dim(sparks)}`
-    })
+    lines.push(dim(`prices ${money(Math.min(...costs))} – ${money(Math.max(...costs))}  ${sparks}`))
   }
-  lines.push("")
-  lines.push(...box(summary, dim))
   lines.push(dim(`buy: ${purchaseUrl(options.accountId, options.name)}`))
 
   return lines.join("\n")

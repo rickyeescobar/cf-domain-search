@@ -43,11 +43,8 @@ const shots: ReadonlyArray<Shot> = [
       "Not supported via API (6) — may still be purchasable in the dashboard",
       "  · malachi.cc  malachi.giving  malachi.lol  malachi.mom  malachi.new  malachi.sh",
       "",
-      "╭──────────────────────────────────────────╮",
-      "│ 343 available · 74 taken · 6 unsupported │",
-      "│ cheapest: malachi.bid at $4.18/yr        │",
-      "│ prices $4.18 – $2,000.20  ▂▂▃█▅▃▂▁▂▂▁▂   │",
-      "╰──────────────────────────────────────────╯"
+      "343 available · 74 taken · 6 unsupported · cheapest: malachi.bid at $4.18/yr",
+      "prices $4.18 – $2,000.20  ▂▂▃█▅▃▂▁▂▂▁▂"
     ].join("\n")
   },
   {
@@ -67,10 +64,7 @@ const shots: ReadonlyArray<Shot> = [
       "Taken (4)",
       "  ✘ malachi.app  malachi.com  malachi.dev  malachi.io",
       "",
-      "╭───────────────────────────────────────╮",
-      "│ 5 available · 4 taken · 0 unsupported │",
-      "│ cheapest: malachi.day at $10.20/yr    │",
-      "╰───────────────────────────────────────╯"
+      "5 available · 4 taken · 0 unsupported · cheapest: malachi.day at $10.20/yr"
     ].join("\n")
   },
   {
