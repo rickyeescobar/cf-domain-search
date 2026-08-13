@@ -1,0 +1,96 @@
+/**
+ * Regenerates the README screenshots (docs/*.png) as ray.so frames.
+ *
+ * ray.so encodes the entire snippet in the URL fragment, so this drives a
+ * local headless Chrome to each URL and screenshots the frame element.
+ *
+ * Run: bun add -d puppeteer-core && bun scripts/screenshots.ts
+ */
+import puppeteer from "puppeteer-core"
+
+const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+interface Shot {
+  readonly file: string
+  readonly title: string
+  readonly language: string
+  readonly code: string
+}
+
+const shots: ReadonlyArray<Shot> = [
+  {
+    file: "docs/sweep.png",
+    title: "cfdom",
+    language: "shell",
+    code: [
+      "$ cfdom malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
+      "",
+      "Available (5)",
+      "  ✔ malachi.day       $10.20  renews $10.20/yr",
+      "  ✔ malachi.page      $10.20  renews $10.20/yr",
+      "  ✔ malachi.rocks     $17.20  renews $17.20/yr",
+      "  ✔ malachi.ninja     $24.20  renews $24.20/yr",
+      "  ✔ malachi.haus      $26.20  renews $26.20/yr",
+      "",
+      "Taken (4)",
+      "  ✘ malachi.app  malachi.com  malachi.dev  malachi.io",
+      "",
+      "5 available · 4 taken · 0 unsupported · cheapest: malachi.day at $10.20/yr"
+    ].join("\n")
+  },
+  {
+    file: "docs/json.png",
+    title: "cfdom malachi --tlds day,com --json",
+    language: "json",
+    code: JSON.stringify(
+      [
+        {
+          name: "malachi.day",
+          registrable: true,
+          tier: "standard",
+          pricing: { currency: "USD", registration_cost: "10.20", renewal_cost: "10.20" }
+        },
+        { name: "malachi.com", registrable: false, reason: "domain_unavailable" }
+      ],
+      null,
+      2
+    )
+  }
+]
+
+const browser = await puppeteer.launch({
+  executablePath: CHROME,
+  headless: true,
+  args: ["--no-first-run", "--hide-scrollbars"]
+})
+
+try {
+  for (const shot of shots) {
+    // A fresh page per shot: ray.so only reads the hash on load, so
+    // navigating an existing page to a new fragment keeps the old snippet.
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1600, height: 1400, deviceScaleFactor: 2 })
+    const params = new URLSearchParams({
+      title: shot.title,
+      theme: "raindrop",
+      padding: "64",
+      background: "true",
+      darkMode: "true",
+      language: shot.language,
+      code: Buffer.from(shot.code, "utf8").toString("base64")
+    })
+    console.log(`→ ${shot.file}`)
+    await page.goto(`https://ray.so/#${params.toString()}`, {
+      waitUntil: "networkidle2",
+      timeout: 60000
+    })
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const frame = await page.$('[class*="DefaultFrame-module"]')
+    if (frame === null) throw new Error(`${shot.file}: ray.so frame element not found`)
+    await frame.screenshot({ path: shot.file as `${string}.png` })
+    await page.close()
+  }
+} finally {
+  await browser.close()
+}
+console.log("done")
