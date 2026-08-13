@@ -1,5 +1,5 @@
 /**
- * The `cfdom` command: check a name's availability and price across every
+ * The `cfdomains` command: check a name's availability and price across every
  * Cloudflare Registrar TLD, plus the `setup` subcommand.
  */
 import { Array as Arr, Config, Console, Data, Effect, Option, Redacted, Result, Runtime, Schema } from "effect"
@@ -78,7 +78,7 @@ const onQuitAbort = () =>
 
 const setup = Command.make("setup", {}, () =>
   wizard.pipe(
-    Effect.flatMap(() => Console.log("\nAll set — try: cfdom yourname")),
+    Effect.flatMap(() => Console.log("\nAll set — try: cfdomains yourname")),
     Effect.catchTag("QuitError", onQuitAbort),
     withStyleFlag
   )).pipe(
@@ -89,7 +89,7 @@ const missingCredentials = new CliError.UserError({
   cause: "missing credentials",
   userMessage: "No Cloudflare credentials found.\n" +
     "Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (env or .env), " +
-    "or run `cfdom setup` in a terminal once."
+    "or run `cfdomains setup` in a terminal once."
 })
 
 const resolveCredentials = Effect.fn(function*(
@@ -201,7 +201,7 @@ const check = Effect.fn(function*(input: {
   }
 })
 
-export const cfdom = Command.make("cfdom", { name, ...flags }, (input) =>
+export const cfdomains = Command.make("cfdomains", { name, ...flags }, (input) =>
   check(input).pipe(Effect.catchTag("QuitError", onQuitAbort), withStyleFlag)).pipe(
     Command.withDescription(
       "Check a name's availability and price across every Cloudflare Registrar TLD"
@@ -209,10 +209,10 @@ export const cfdom = Command.make("cfdom", { name, ...flags }, (input) =>
     Command.withSubcommands([setup]),
     Command.withGlobalFlags([NoColor]),
     Command.withExamples([
-      { command: "cfdom myname", description: "Check myname.<tld> for every known TLD" },
-      { command: "cfdom myname --available", description: "Only show available domains" },
-      { command: "cfdom myname --tlds com,dev,io", description: "Restrict to specific TLDs" },
-      { command: "cfdom myname.dev", description: "Check a single exact domain" },
-      { command: "cfdom setup", description: "Interactive credential setup" }
+      { command: "cfdomains myname", description: "Check myname.<tld> for every known TLD" },
+      { command: "cfdomains myname --available", description: "Only show available domains" },
+      { command: "cfdomains myname --tlds com,dev,io", description: "Restrict to specific TLDs" },
+      { command: "cfdomains myname.dev", description: "Check a single exact domain" },
+      { command: "cfdomains setup", description: "Interactive credential setup" }
     ])
   )

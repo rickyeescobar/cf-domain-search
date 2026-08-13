@@ -9,7 +9,7 @@ import { NodeRuntime, NodeServices } from "@effect/platform-node"
 import { Effect, Layer } from "effect"
 import { Command } from "effect/unstable/cli"
 import { FetchHttpClient } from "effect/unstable/http"
-import { cfdom } from "./Cli.ts"
+import { cfdomains } from "./Cli.ts"
 import { Cloudflare } from "./Cloudflare.ts"
 import { CredentialStore } from "./Credentials.ts"
 
@@ -18,7 +18,7 @@ const MainLayer = Layer.provideMerge(
   Layer.mergeAll(NodeServices.layer, FetchHttpClient.layer)
 )
 
-cfdom.pipe(
+cfdomains.pipe(
   Command.run({ version: "0.2.0" }),
   Effect.provide(MainLayer),
   NodeRuntime.runMain

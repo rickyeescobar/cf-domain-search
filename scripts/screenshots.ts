@@ -20,10 +20,10 @@ interface Shot {
 const shots: ReadonlyArray<Shot> = [
   {
     file: "docs/sweep.png",
-    title: "cfdom",
+    title: "cfdomains",
     language: "shell",
     code: [
-      "$ cfdom malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
+      "$ cfdomains malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
       "",
       "Available (5)",
       "  ✔ malachi.day       $10.20  renews $10.20/yr",
@@ -40,7 +40,7 @@ const shots: ReadonlyArray<Shot> = [
   },
   {
     file: "docs/json.png",
-    title: "cfdom malachi --tlds day,com --json",
+    title: "cfdomains malachi --tlds day,com --json",
     language: "json",
     code: JSON.stringify(
       [

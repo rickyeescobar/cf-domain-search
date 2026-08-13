@@ -5,7 +5,7 @@
  *
  *   1. `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` environment variables
  *   2. a `.env` file in the working directory (never overrides real env vars)
- *   3. the config saved by `cfdom setup` (`~/.config/cf-domain-search/config.json`)
+ *   3. the config saved by `cfdomains setup` (`~/.config/cf-domain-search/config.json`)
  *
  * The `--token` / `--account-id` flags (see Cli.ts) take precedence over all
  * of these, and the interactive wizard is the last resort.
@@ -46,7 +46,7 @@ export class CredentialStore extends Context.Service<CredentialStore, {
   save(credentials: Credentials): Effect.Effect<void, PlatformError>
   /** Where `save` writes. */
   readonly configPath: string
-}>()("cfdom/CredentialStore") {
+}>()("cfdomains/CredentialStore") {
   static readonly layer = Layer.effect(
     CredentialStore,
     Effect.gen(function*() {

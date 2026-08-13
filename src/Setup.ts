@@ -34,7 +34,7 @@ const registrarHints = (accountId: string, { bold }: Style) => `
     · the Domain Registration Agreement hasn't been accepted — open
       https://dash.cloudflare.com/${accountId}/domains/registrations/purchase once
     · the account has no billing profile / payment method
-  Fix it in the dashboard, then re-run: ${bold("cfdom setup")}
+  Fix it in the dashboard, then re-run: ${bold("cfdomains setup")}
 `
 
 const askToken = Effect.fn(function*(cloudflare: typeof Cloudflare.Service) {
@@ -124,7 +124,7 @@ export const wizard: Effect.Effect<
   if (save) {
     yield* store.save(credentials).pipe(
       Effect.tap(() =>
-        Console.log(style.dim("  saved (file mode 600) — re-run `cfdom setup` anytime to replace"))
+        Console.log(style.dim("  saved (file mode 600) — re-run `cfdomains setup` anytime to replace"))
       ),
       Effect.catch((error) =>
         Console.error(style.red(`  could not save credentials: ${error.message}`))

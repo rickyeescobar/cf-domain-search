@@ -15,13 +15,13 @@ const API_URL = "https://api.cloudflare.com/client/v4"
 /** Cloudflare returns money as strings; be liberal and accept numbers too. */
 const Money = Schema.Union([Schema.String, Schema.Finite])
 
-export class Pricing extends Schema.Class<Pricing>("cfdom/Pricing")({
+export class Pricing extends Schema.Class<Pricing>("cfdomains/Pricing")({
   currency: Schema.optionalKey(Schema.String),
   registration_cost: Schema.optionalKey(Money),
   renewal_cost: Schema.optionalKey(Money)
 }) {}
 
-export class CheckedDomain extends Schema.Class<CheckedDomain>("cfdom/CheckedDomain")({
+export class CheckedDomain extends Schema.Class<CheckedDomain>("cfdomains/CheckedDomain")({
   name: Schema.String,
   registrable: Schema.Boolean,
   tier: Schema.optionalKey(Schema.String),
@@ -29,7 +29,7 @@ export class CheckedDomain extends Schema.Class<CheckedDomain>("cfdom/CheckedDom
   pricing: Schema.optionalKey(Pricing)
 }) {}
 
-export class Account extends Schema.Class<Account>("cfdom/Account")({
+export class Account extends Schema.Class<Account>("cfdomains/Account")({
   id: Schema.String,
   name: Schema.String
 }) {}
@@ -90,7 +90,7 @@ export class Cloudflare extends Context.Service<Cloudflare, {
     credentials: Credentials,
     domains: ReadonlyArray<string>
   ): Effect.Effect<ReadonlyArray<CheckedDomain>, CloudflareError>
-}>()("cfdom/Cloudflare") {
+}>()("cfdomains/Cloudflare") {
   static readonly layer = Layer.effect(
     Cloudflare,
     Effect.gen(function*() {

@@ -5,7 +5,7 @@ cost — across all 423 [Cloudflare Registrar](https://developers.cloudflare.com
 TLDs, in one command.
 
 <p align="center">
-  <img src="docs/sweep.png" width="760" alt="cfdom output: available domains sorted cheapest first, then taken domains, then a summary line">
+  <img src="docs/sweep.png" width="760" alt="cfdomains output: available domains sorted cheapest first, then taken domains, then a summary line">
 </p>
 
 Availability is authoritative — a live registry check through Cloudflare's Registrar API,
@@ -20,7 +20,7 @@ npx cf-domain-search myname
 
 That's it. On first run with no credentials, an interactive wizard walks you through
 creating a Cloudflare API token, verifies it live, finds your account, and saves the
-result to `~/.config/cf-domain-search/config.json`. Re-run it anytime with `cfdom setup`.
+result to `~/.config/cf-domain-search/config.json`. Re-run it anytime with `cfdomains setup`.
 
 Requires Node ≥ 20 and a free Cloudflare account. Not on npm yet? Run it from a clone:
 `bun install && bun src/bin.ts myname`.
@@ -28,12 +28,12 @@ Requires Node ≥ 20 and a free Cloudflare account. Not on npm yet? Run it from 
 ## Usage
 
 ```sh
-cfdom myname                    # sweep all 423 TLDs (takes a few seconds)
-cfdom myname --available        # only show the available ones
-cfdom myname --tlds com,dev,io  # check specific TLDs
-cfdom myname.dev                # exact single-domain check
-cfdom myname --json             # machine-readable output
-cfdom myname --live-tlds        # merge the latest TLD list from cfdomainpricing.com
+cfdomains myname                    # sweep all 423 TLDs (takes a few seconds)
+cfdomains myname --available        # only show the available ones
+cfdomains myname --tlds com,dev,io  # check specific TLDs
+cfdomains myname.dev                # exact single-domain check
+cfdomains myname --json             # machine-readable output
+cfdomains myname --live-tlds        # merge the latest TLD list from cfdomainpricing.com
 ```
 
 Results come back in three groups:
@@ -50,7 +50,7 @@ Also built in: `--help`, `--version`, `--no-color` (or the `NO_COLOR` env var),
 <details>
 <summary>What <code>--json</code> looks like</summary>
 <p align="center">
-  <img src="docs/json.png" width="560" alt="cfdom --json output: an array of objects with name, registrable, tier, and pricing fields">
+  <img src="docs/json.png" width="560" alt="cfdomains --json output: an array of objects with name, registrable, tier, and pricing fields">
 </p>
 </details>
 
@@ -61,7 +61,7 @@ Credentials are looked up in this order — the wizard is only the last resort:
 1. `--token` / `--account-id` flags
 2. `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` environment variables
 3. a `.env` file in the working directory
-4. the config saved by `cfdom setup`
+4. the config saved by `cfdomains setup`
 
 > [!IMPORTANT]
 > The API token needs the **Account → Registrar Domains → Edit** permission — the beta
@@ -102,7 +102,7 @@ searches.
 ```sh
 bun install        # also applies the effect-tsgo patch (prepare script)
 bun run check      # tsc 7 --noEmit with Effect diagnostics
-bun run build      # bundle src/bin.ts → dist/cfdom.js (self-contained, no deps)
+bun run build      # bundle src/bin.ts → dist/cfdomains.js (self-contained, no deps)
 ```
 
 The README screenshots are generated from real output with
@@ -111,7 +111,7 @@ The README screenshots are generated from real output with
 ### Publishing
 
 `prepack` runs the typecheck and build, shipping `dist/` with bins `cf-domain-search` and
-`cfdom`. Verify locally with `npm pack` and
+`cfdomains`. Verify locally with `npm pack` and
 `npx --yes --package=./cf-domain-search-0.2.0.tgz cf-domain-search myname`, then
 `npm publish`.
 

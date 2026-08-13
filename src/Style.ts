@@ -35,7 +35,7 @@ export const plain: Style = {
   bold: identity
 }
 
-export const Style = Context.Reference<Style>("cfdom/Style", {
+export const Style = Context.Reference<Style>("cfdomains/Style", {
   defaultValue: () =>
     process.stdout.isTTY === true && process.env.NO_COLOR === undefined ? colored : plain
 })

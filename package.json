@@ -14,8 +14,8 @@
   },
   "type": "module",
   "bin": {
-    "cf-domain-search": "dist/cfdom.js",
-    "cfdom": "dist/cfdom.js"
+    "cf-domain-search": "dist/cfdomains.js",
+    "cfdomains": "dist/cfdomains.js"
   },
   "files": [
     "dist"
@@ -24,7 +24,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "bun build src/bin.ts --target=node --banner='#!/usr/bin/env node' --minify-syntax --outfile=dist/cfdom.js",
+    "build": "bun build src/bin.ts --target=node --banner='#!/usr/bin/env node' --minify-syntax --outfile=dist/cfdomains.js",
     "check": "tsc --noEmit",
     "prepack": "bun run check && bun run build",
     "prepare": "effect-tsgo patch --typescript --no-oxlint"
