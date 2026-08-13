@@ -51,8 +51,15 @@ it opens the Cloudflare purchase page for that exact domain. `--links` prints th
 URLs as visible text, and `--json` always includes them as `purchase_url`, so scripts and
 agents get the links too.
 
-Also built in: `--help`, `--version`, `--no-color` (or the `NO_COLOR` env var),
+Also built in: `--help`/`-h`, `--version`, `--no-color` (or the `NO_COLOR` env var),
 `--wizard` for guided flag entry, and `--completions bash|zsh|fish|sh`.
+
+<details>
+<summary>The full <code>--help</code> reference</summary>
+<p align="center">
+  <img src="docs/help.png" width="700" alt="cfdomains --help output: description, usage, arguments, flags, global flags, and subcommands">
+</p>
+</details>
 
 <details>
 <summary>What a scoped <code>--tlds</code> run looks like</summary>
