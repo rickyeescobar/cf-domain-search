@@ -1,5 +1,5 @@
 /**
- * The cfdomains cloud, printed at the top of every human-facing interaction
+ * The cf-domain-search cloud, printed at the top of every human-facing interaction
  * (never in `--json` output).
  */
 import { Console, Effect } from "effect"
@@ -8,7 +8,7 @@ import { Style } from "./Style.ts"
 export const banner = ({ bold, dim, orange }: Style): string =>
   [
     orange("        ▄▄▄▄▄"),
-    `${orange("    ▄▄█████████▄▄")}            ${bold("cfdomains")}`,
+    `${orange("    ▄▄█████████▄▄")}            ${bold("cf-domain-search")}`,
     `${orange("  ▄███████████████▄▄▄")}        ${dim("Cloudflare Registrar domain search")}`,
     orange(" ▟█████████████████████▙"),
     orange(" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀")

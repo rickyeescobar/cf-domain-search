@@ -7,7 +7,7 @@ cost — across all 423 [Cloudflare Registrar](https://developers.cloudflare.com
 TLDs, in one command.
 
 <p align="center">
-  <img src="docs/fullsweep.png" width="760" alt="cfdomains full-sweep output: 343 available domains sorted cheapest first, taken domains, unsupported TLDs, and a summary line">
+  <img src="docs/fullsweep.png" width="760" alt="cf-domain-search full-sweep output: 343 available domains sorted alphabetically, taken domains, unsupported TLDs, and a summary line">
 </p>
 
 Availability is authoritative — a live registry check through Cloudflare's Registrar API,
@@ -22,21 +22,23 @@ npx cf-domain-search myname
 
 That's it. On first run with no credentials, an interactive wizard walks you through
 creating a Cloudflare API token, verifies it live, finds your account, and saves the
-result to `~/.config/cf-domain-search/config.json`. Re-run it anytime with `cfdomains setup`.
+result to `~/.config/cf-domain-search/config.json`. Re-run it anytime with
+`npx cf-domain-search setup`.
 
 Requires Node ≥ 20 and a free Cloudflare account. Prefer a permanent install?
-`npm install -g cf-domain-search` puts `cfdomains` on your PATH.
+`npm install -g cf-domain-search` puts `cf-domain-search` on your PATH (plus a
+shorter `cfdomains` alias).
 
 ## Usage
 
 ```sh
-cfdomains myname                    # sweep all 423 TLDs (takes a few seconds)
-cfdomains myname --available        # only show the available ones
-cfdomains myname --tlds com,dev,io  # check specific TLDs
-cfdomains myname.dev                # exact single-domain check
-cfdomains myname --links            # print a purchase link under each available domain
-cfdomains myname --json             # machine-readable output (with purchase_url per domain)
-cfdomains myname --live-tlds        # merge the latest TLD list from cfdomainpricing.com
+npx cf-domain-search myname                    # sweep all 423 TLDs (takes a few seconds)
+npx cf-domain-search myname --available        # only show the available ones
+npx cf-domain-search myname --tlds com,dev,io  # check specific TLDs
+npx cf-domain-search myname.dev                # exact single-domain check
+npx cf-domain-search myname --links            # purchase link under each available domain
+npx cf-domain-search myname --json             # machine-readable, purchase_url per domain
+npx cf-domain-search myname --live-tlds        # merge TLD list from cfdomainpricing.com
 ```
 
 Results come back in three groups:
@@ -59,21 +61,21 @@ Also built in: `--help`/`-h`, `--version`, `--no-color` (or the `NO_COLOR` env v
 <details>
 <summary>The full <code>--help</code> reference</summary>
 <p align="center">
-  <img src="docs/help.png" width="700" alt="cfdomains --help output: description, usage, arguments, flags, global flags, and subcommands">
+  <img src="docs/help.png" width="700" alt="cf-domain-search --help output: description, usage, arguments, flags, global flags, and subcommands">
 </p>
 </details>
 
 <details>
 <summary>What a scoped <code>--tlds</code> run looks like</summary>
 <p align="center">
-  <img src="docs/sweep.png" width="700" alt="cfdomains --tlds output: five available domains with prices and four taken domains">
+  <img src="docs/sweep.png" width="700" alt="cf-domain-search --tlds output: five available domains with prices and four taken domains">
 </p>
 </details>
 
 <details>
 <summary>What <code>--json</code> looks like</summary>
 <p align="center">
-  <img src="docs/json.png" width="560" alt="cfdomains --json output: an array of objects with name, registrable, tier, and pricing fields">
+  <img src="docs/json.png" width="560" alt="cf-domain-search --json output: an array of objects with name, registrable, tier, and pricing fields">
 </p>
 </details>
 
@@ -84,12 +86,12 @@ Credentials are looked up in this order — the wizard is only the last resort:
 1. `--token` / `--account-id` flags
 2. `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` environment variables
 3. a `.env` file in the working directory
-4. the config saved by `cfdomains setup`
+4. the config saved by `cf-domain-search setup`
 
 The wizard stores credentials in `~/.config/cf-domain-search/config.json`
 (honoring `$XDG_CONFIG_HOME` if set), written with file mode `600` so only your
-user can read the token. Re-running `cfdomains setup` replaces it, and
-`cfdomains logout` deletes it.
+user can read the token. Re-running `cf-domain-search setup` replaces it, and
+`cf-domain-search logout` deletes it.
 
 > [!IMPORTANT]
 > The API token needs the **Account → Registrar Domains → Edit** permission — the beta

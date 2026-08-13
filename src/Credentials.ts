@@ -6,7 +6,7 @@
  *   1. `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` via Config — real
  *      environment variables first, then a `.env` in the working directory
  *      (the ConfigProvider layer in bin.ts adds the `.env` fallback)
- *   2. the config saved by `cfdomains setup` (`~/.config/cf-domain-search/config.json`)
+ *   2. the config saved by `cf-domain-search setup` (`~/.config/cf-domain-search/config.json`)
  *
  * The `--token` / `--account-id` flags (see Cli.ts) take precedence over all
  * of these, and the interactive wizard is the last resort.

@@ -22,14 +22,14 @@ interface Shot {
 const shots: ReadonlyArray<Shot> = [
   {
     file: "docs/fullsweep.png",
-    title: "cfdomains",
+    title: "cf-domain-search",
     language: "shell",
     width: 1010,
     code: [
-      "$ cfdomains malachi",
+      "$ npx cf-domain-search malachi",
       "",
       "        ▄▄▄▄▄",
-      "    ▄▄█████████▄▄            cfdomains",
+      "    ▄▄█████████▄▄            cf-domain-search",
       "  ▄███████████████▄▄▄        Cloudflare Registrar domain search",
       " ▟█████████████████████▙",
       " ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀",
@@ -58,14 +58,14 @@ const shots: ReadonlyArray<Shot> = [
   },
   {
     file: "docs/sweep.png",
-    title: "cfdomains",
+    title: "cf-domain-search",
     language: "shell",
     width: 1010,
     code: [
-      "$ cfdomains malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
+      "$ npx cf-domain-search malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
       "",
       "        ▄▄▄▄▄",
-      "    ▄▄█████████▄▄            cfdomains",
+      "    ▄▄█████████▄▄            cf-domain-search",
       "  ▄███████████████▄▄▄        Cloudflare Registrar domain search",
       " ▟█████████████████████▙",
       " ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀",
@@ -86,16 +86,16 @@ const shots: ReadonlyArray<Shot> = [
   },
   {
     file: "docs/help.png",
-    title: "cfdomains --help",
+    title: "cf-domain-search --help",
     language: "shell",
     code: [
-      "$ cfdomains --help",
+      "$ npx cf-domain-search --help",
       "",
       "DESCRIPTION",
       "  Check a name's availability and price across every Cloudflare Registrar TLD",
       "",
       "USAGE",
-      "  cfdomains <subcommand> [flags] <name>",
+      "  cf-domain-search <subcommand> [flags] <name>",
       "",
       "ARGUMENTS",
       "  name string    Name to check across TLDs, or a full domain for an exact check",
@@ -119,12 +119,12 @@ const shots: ReadonlyArray<Shot> = [
       "",
       "SUBCOMMANDS",
       "  setup     Interactive credential setup",
-      "  logout    Delete credentials saved by `cfdomains setup`"
+      "  logout    Delete credentials saved by `cf-domain-search setup`"
     ].join("\n")
   },
   {
     file: "docs/json.png",
-    title: "cfdomains malachi --tlds day,com --json",
+    title: "cf-domain-search malachi --tlds day,com --json",
     language: "json",
     code: JSON.stringify(
       [

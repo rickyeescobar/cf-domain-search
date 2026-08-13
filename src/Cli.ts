@@ -1,5 +1,5 @@
 /**
- * The `cfdomains` command: check a name's availability and price across every
+ * The `cf-domain-search` command: check a name's availability and price across every
  * Cloudflare Registrar TLD, plus the `setup` subcommand.
  */
 import { Array as Arr, Config, Console, Data, Effect, Option, Redacted, Ref, Result, Runtime, Schema } from "effect"
@@ -90,7 +90,7 @@ const onQuitAbort = () =>
 const setup = Command.make("setup", {}, () =>
   printBanner.pipe(
     Effect.flatMap(() => wizard),
-    Effect.flatMap(() => Console.log("\nSetup complete. Try: cfdomains yourname")),
+    Effect.flatMap(() => Console.log("\nSetup complete. Try: cf-domain-search yourname")),
     Effect.catchTag("QuitError", onQuitAbort),
     withStyleFlag
   )).pipe(
@@ -110,14 +110,14 @@ const logout = Command.make("logout", {}, () =>
       yield* Console.log(`\nNo saved credentials (${store.configPath} does not exist).`)
     }
   }).pipe(withStyleFlag)).pipe(
-    Command.withDescription("Delete credentials saved by `cfdomains setup`")
+    Command.withDescription("Delete credentials saved by `cf-domain-search setup`")
   )
 
 const missingCredentials = new CliError.UserError({
   cause: "missing credentials",
   userMessage: "No Cloudflare credentials found.\n" +
     "Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (env or .env), " +
-    "or run `cfdomains setup` in a terminal once."
+    "or run `cf-domain-search setup` in a terminal once."
 })
 
 const resolveCredentials = Effect.fn(function*(
@@ -242,7 +242,7 @@ const check = Effect.fn(function*(input: {
   }
 })
 
-export const cfdomains = Command.make("cfdomains", { name, ...flags }, (input) =>
+export const cfdomains = Command.make("cf-domain-search", { name, ...flags }, (input) =>
   check(input).pipe(Effect.catchTag("QuitError", onQuitAbort), withStyleFlag)).pipe(
     Command.withDescription(
       "Check a name's availability and price across every Cloudflare Registrar TLD"
@@ -250,11 +250,11 @@ export const cfdomains = Command.make("cfdomains", { name, ...flags }, (input) =
     Command.withSubcommands([setup, logout]),
     Command.withGlobalFlags([NoColor]),
     Command.withExamples([
-      { command: "cfdomains myname", description: "Check myname.<tld> for every known TLD" },
-      { command: "cfdomains myname --available", description: "Only show available domains" },
-      { command: "cfdomains myname --tlds com,dev,io", description: "Restrict to specific TLDs" },
-      { command: "cfdomains myname --links", description: "Show purchase links per domain" },
-      { command: "cfdomains myname.dev", description: "Check a single exact domain" },
-      { command: "cfdomains setup", description: "Interactive credential setup" }
+      { command: "cf-domain-search myname", description: "Check myname.<tld> for every known TLD" },
+      { command: "cf-domain-search myname --available", description: "Only show available domains" },
+      { command: "cf-domain-search myname --tlds com,dev,io", description: "Restrict to specific TLDs" },
+      { command: "cf-domain-search myname --links", description: "Show purchase links per domain" },
+      { command: "cf-domain-search myname.dev", description: "Check a single exact domain" },
+      { command: "cf-domain-search setup", description: "Interactive credential setup" }
     ])
   )
