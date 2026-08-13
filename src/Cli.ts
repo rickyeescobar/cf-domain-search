@@ -4,6 +4,7 @@
  */
 import { Array as Arr, Config, Console, Data, Effect, Option, Redacted, Ref, Result, Runtime, Schema } from "effect"
 import { Argument, CliError, Command, Flag, GlobalFlag } from "effect/unstable/cli"
+import { printBanner } from "./Banner.ts"
 import { CheckedDomain, Cloudflare, type CloudflareError } from "./Cloudflare.ts"
 import { CredentialStore, type Credentials } from "./Credentials.ts"
 import { purchaseUrl, render, type BatchFailure } from "./Report.ts"
@@ -87,7 +88,8 @@ const onQuitAbort = () =>
   Console.error("Setup aborted.").pipe(Effect.flatMap(() => new QuietFailure()))
 
 const setup = Command.make("setup", {}, () =>
-  wizard.pipe(
+  printBanner.pipe(
+    Effect.flatMap(() => wizard),
     Effect.flatMap(() => Console.log("\nSetup complete. Try: cfdomains yourname")),
     Effect.catchTag("QuitError", onQuitAbort),
     withStyleFlag
@@ -99,12 +101,13 @@ const logout = Command.make("logout", {}, () =>
   Effect.gen(function*() {
     const store = yield* CredentialStore
     const { dim, green } = yield* Style
+    yield* printBanner
     const removed = yield* store.clear
     if (removed) {
-      yield* Console.log(`${green("✔")} removed ${store.configPath}`)
+      yield* Console.log(`\n${green("✔")} removed ${store.configPath}`)
       yield* Console.log(dim("Environment variables and .env files are untouched."))
     } else {
-      yield* Console.log(`No saved credentials (${store.configPath} does not exist).`)
+      yield* Console.log(`\nNo saved credentials (${store.configPath} does not exist).`)
     }
   }).pipe(withStyleFlag)).pipe(
     Command.withDescription("Delete credentials saved by `cfdomains setup`")
@@ -205,6 +208,7 @@ const check = Effect.fn(function*(input: {
   readonly accountId: Option.Option<string>
 }) {
   const query = input.name.toLowerCase().replace(/\.$/, "")
+  if (!input.json) yield* printBanner
   const credentials = yield* resolveCredentials(input.token, input.accountId)
   const tlds = yield* resolveTlds(input.tlds, input.liveTlds)
 

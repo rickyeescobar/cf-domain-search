@@ -9,13 +9,7 @@ import { Cloudflare } from "./Cloudflare.ts"
 import { CredentialStore, type Credentials } from "./Credentials.ts"
 import { Style } from "./Style.ts"
 
-const intro = ({ bold, dim, orange }: Style) => `
-${orange("        ▄▄▄▄▄")}
-${orange("    ▄▄█████████▄▄")}            ${bold("cfdomains")}
-${orange("  ▄███████████████▄▄▄")}        ${dim("Cloudflare Registrar domain search")}
-${orange(" ▟█████████████████████▙")}
-${orange(" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀")}
-
+const intro = ({ bold, dim }: Style) => `
 ${bold("Setup")}
 
 Domain checks go through Cloudflare's Registrar API, which needs an API token
