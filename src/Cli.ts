@@ -242,7 +242,7 @@ const check = Effect.fn(function*(input: {
   }
 })
 
-export const cfdomains = Command.make("cf-domain-search", { name, ...flags }, (input) =>
+export const cfDomainSearch = Command.make("cf-domain-search", { name, ...flags }, (input) =>
   check(input).pipe(Effect.catchTag("QuitError", onQuitAbort), withStyleFlag)).pipe(
     Command.withDescription(
       "Check a name's availability and price across every Cloudflare Registrar TLD"

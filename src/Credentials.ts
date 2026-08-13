@@ -36,7 +36,7 @@ export class CredentialStore extends Context.Service<CredentialStore, {
   readonly clear: Effect.Effect<boolean, PlatformError>
   /** Where `save` writes. */
   readonly configPath: string
-}>()("cfdomains/CredentialStore") {
+}>()("cf-domain-search/CredentialStore") {
   static readonly layer = Layer.effect(
     CredentialStore,
     Effect.gen(function*() {

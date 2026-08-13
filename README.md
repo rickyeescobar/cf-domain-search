@@ -133,7 +133,7 @@ searches.
 bun install        # also applies the effect-tsgo patch (prepare script)
 bun run check      # tsc 7 --noEmit with Effect diagnostics
 bun run test       # offline @effect/vitest suite: mock layers, TestClock, no network
-bun run build      # bundle src/bin.ts → dist/cfdomains.js (self-contained, no deps)
+bun run build      # bundle src/bin.ts → dist/cf-domain-search.js (self-contained, no deps)
 ```
 
 The README screenshots are generated from real output with

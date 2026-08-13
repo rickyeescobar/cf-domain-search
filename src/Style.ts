@@ -42,7 +42,7 @@ export const plain: Style = {
   link: identity
 }
 
-export const Style = Context.Reference<Style>("cfdomains/Style", {
+export const Style = Context.Reference<Style>("cf-domain-search/Style", {
   defaultValue: () =>
     process.stdout.isTTY === true && process.env.NO_COLOR === undefined ? colored : plain
 })
