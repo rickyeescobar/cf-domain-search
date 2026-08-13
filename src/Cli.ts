@@ -88,7 +88,7 @@ const onQuitAbort = () =>
 
 const setup = Command.make("setup", {}, () =>
   wizard.pipe(
-    Effect.flatMap(() => Console.log("\nAll set — try: cfdomains yourname")),
+    Effect.flatMap(() => Console.log("\nSetup complete. Try: cfdomains yourname")),
     Effect.catchTag("QuitError", onQuitAbort),
     withStyleFlag
   )).pipe(

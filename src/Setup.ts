@@ -16,10 +16,10 @@ ${orange("  ▄███████████████▄▄▄")}        
 ${orange(" ▟█████████████████████▙")}
 ${orange(" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀")}
 
-${bold("Setup")} — this takes about two minutes and runs once.
+${bold("Setup")}
 
-The tool checks domain availability through Cloudflare's Registrar API, which
-needs an API token from your (free) Cloudflare account:
+Domain checks go through Cloudflare's Registrar API, which needs an API token
+from your Cloudflare account:
 
   1. Open           ${bold("https://dash.cloudflare.com/profile/api-tokens")}
   2. Click          Create Token → Custom token (bottom of the page)
@@ -30,12 +30,12 @@ needs an API token from your (free) Cloudflare account:
   5. Account Resources   Include · your account
   6. Continue to summary → Create Token → copy the token
 
-${dim("Tip: create a fresh token rather than editing an old one — added permissions")}
-${dim("on existing tokens have been seen to never take effect (endless 403s).")}
+${dim("Create a fresh token rather than editing an old one — permissions added to")}
+${dim("existing tokens may never take effect (endless 403s).")}
 `
 
 const registrarHints = (accountId: string, { bold }: Style) => `
-  The token is valid but the Registrar API turned it away. Usual causes:
+  The token is valid but the Registrar API rejected it. Likely causes:
     · the permission row isn't exactly ${bold("Account · Registrar Domains · Edit")}
     · the Domain Registration Agreement hasn't been accepted — open
       https://dash.cloudflare.com/${accountId}/domains/registrations/purchase once
@@ -130,7 +130,7 @@ export const wizard: Effect.Effect<
   if (save) {
     yield* store.save(credentials).pipe(
       Effect.tap(() =>
-        Console.log(style.dim("  saved (file mode 600) — re-run `cfdomains setup` anytime to replace"))
+        Console.log(style.dim("  saved (file mode 600) — re-run `cfdomains setup` to replace"))
       ),
       Effect.catch((error) =>
         Console.error(style.red(`  could not save credentials: ${error.message}`))
