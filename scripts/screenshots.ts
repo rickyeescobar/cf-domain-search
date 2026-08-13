@@ -85,6 +85,10 @@ try {
       timeout: 60000
     })
     await new Promise((resolve) => setTimeout(resolve, 1500))
+    // Hide the resize drag handles so they don't appear at the image edges.
+    await page.addStyleTag({
+      content: '[class*="windowSizeDragPoint"] { display: none !important }'
+    })
     const frame = await page.$('[class*="DefaultFrame-module"]')
     if (frame === null) throw new Error(`${shot.file}: ray.so frame element not found`)
     await frame.screenshot({ path: shot.file as `${string}.png` })
