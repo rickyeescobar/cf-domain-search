@@ -32,6 +32,8 @@ export class CredentialStore extends Context.Service<CredentialStore, {
   readonly load: Effect.Effect<Option.Option<Credentials>>
   /** Persist credentials to the config file (mode 600). */
   save(credentials: Credentials): Effect.Effect<void, PlatformError>
+  /** Delete the config file; false when there was none. */
+  readonly clear: Effect.Effect<boolean, PlatformError>
   /** Where `save` writes. */
   readonly configPath: string
 }>()("cfdomains/CredentialStore") {
@@ -78,7 +80,13 @@ export class CredentialStore extends Context.Service<CredentialStore, {
           yield* fs.chmod(configPath, 0o600)
         })
 
-      return CredentialStore.of({ load, save, configPath })
+      const clear = Effect.gen(function*() {
+        const exists = yield* fs.exists(configPath)
+        if (exists) yield* fs.remove(configPath)
+        return exists
+      })
+
+      return CredentialStore.of({ load, save, clear, configPath })
     })
   )
 }

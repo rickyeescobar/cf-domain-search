@@ -106,7 +106,8 @@ const shots: ReadonlyArray<Shot> = [
       "  --no-color                          Disable colored output",
       "",
       "SUBCOMMANDS",
-      "  setup    Interactive credential setup"
+      "  setup     Interactive credential setup",
+      "  logout    Delete credentials saved by `cfdomains setup`"
     ].join("\n")
   },
   {

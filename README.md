@@ -86,8 +86,8 @@ Credentials are looked up in this order — the wizard is only the last resort:
 
 The wizard stores credentials in `~/.config/cf-domain-search/config.json`
 (honoring `$XDG_CONFIG_HOME` if set), written with file mode `600` so only your
-user can read the token. Re-running `cfdomains setup` replaces it; delete the
-file to sign out.
+user can read the token. Re-running `cfdomains setup` replaces it, and
+`cfdomains logout` deletes it.
 
 > [!IMPORTANT]
 > The API token needs the **Account → Registrar Domains → Edit** permission — the beta

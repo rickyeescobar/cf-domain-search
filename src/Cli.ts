@@ -95,6 +95,21 @@ const setup = Command.make("setup", {}, () =>
     Command.withDescription("Interactive credential setup")
   )
 
+const logout = Command.make("logout", {}, () =>
+  Effect.gen(function*() {
+    const store = yield* CredentialStore
+    const { dim, green } = yield* Style
+    const removed = yield* store.clear
+    if (removed) {
+      yield* Console.log(`${green("✔")} removed ${store.configPath}`)
+      yield* Console.log(dim("Environment variables and .env files are untouched."))
+    } else {
+      yield* Console.log(`No saved credentials (${store.configPath} does not exist).`)
+    }
+  }).pipe(withStyleFlag)).pipe(
+    Command.withDescription("Delete credentials saved by `cfdomains setup`")
+  )
+
 const missingCredentials = new CliError.UserError({
   cause: "missing credentials",
   userMessage: "No Cloudflare credentials found.\n" +
@@ -227,7 +242,7 @@ export const cfdomains = Command.make("cfdomains", { name, ...flags }, (input) =
     Command.withDescription(
       "Check a name's availability and price across every Cloudflare Registrar TLD"
     ),
-    Command.withSubcommands([setup]),
+    Command.withSubcommands([setup, logout]),
     Command.withGlobalFlags([NoColor]),
     Command.withExamples([
       { command: "cfdomains myname", description: "Check myname.<tld> for every known TLD" },
