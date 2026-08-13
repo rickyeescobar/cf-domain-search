@@ -8,8 +8,7 @@
       "ES2023"
     ],
     "types": [
-      "node",
-      "bun"
+      "node"
     ],
     "strict": true,
     "exactOptionalPropertyTypes": true,

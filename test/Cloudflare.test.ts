@@ -1,9 +1,11 @@
-import { describe, expect, test } from "bun:test"
-import { Effect, Layer, Redacted } from "effect"
+import { describe, it } from "@effect/vitest"
+import { assertTrue, deepStrictEqual, strictEqual } from "@effect/vitest/utils"
+import { Effect, Fiber, Layer, Redacted } from "effect"
+import { TestClock } from "effect/testing"
 import { HttpClient, HttpClientResponse } from "effect/unstable/http"
 import { Cloudflare } from "../src/Cloudflare.ts"
 
-/** A Cloudflare layer whose HTTP client answers every request with `body`. */
+/** A Cloudflare layer whose HTTP client answers every request with `body()`. */
 const respondingWith = (body: () => Response) =>
   Cloudflare.layer.pipe(
     Layer.provide(
@@ -29,39 +31,53 @@ const checkDomains = Effect.gen(function*() {
 })
 
 describe("checkDomains", () => {
-  test("decodes the bare-array response shape", async () => {
-    const body = json({ success: true, result: [{ name: "acme.day", registrable: true }] })
-    const result = await Effect.runPromise(
-      checkDomains.pipe(Effect.provide(respondingWith(() => body)))
-    )
-    expect(result).toHaveLength(1)
-    expect(result.map((domain) => domain.name)).toEqual(["acme.day"])
-  })
+  it.effect("decodes the bare-array response shape", () =>
+    Effect.gen(function*() {
+      const body = json({ success: true, result: [{ name: "acme.day", registrable: true }] })
+      const result = yield* checkDomains.pipe(Effect.provide(respondingWith(() => body)))
+      deepStrictEqual(result.map((domain) => domain.name), ["acme.day"])
+    }))
 
-  test("decodes the wrapped { domains } response shape", async () => {
-    const body = json({ success: true, result: { domains: [{ name: "acme.day", registrable: false }] } })
-    const result = await Effect.runPromise(
-      checkDomains.pipe(Effect.provide(respondingWith(() => body)))
-    )
-    expect(result.map((domain) => domain.registrable)).toEqual([false])
-  })
+  it.effect("decodes the wrapped { domains } response shape", () =>
+    Effect.gen(function*() {
+      const body = json({ success: true, result: { domains: [{ name: "acme.day", registrable: false }] } })
+      const result = yield* checkDomains.pipe(Effect.provide(respondingWith(() => body)))
+      deepStrictEqual(result.map((domain) => domain.registrable), [false])
+    }))
 
-  test("surfaces API error messages as CloudflareError", async () => {
-    const body = json({ success: false, errors: [{ code: 10000, message: "Authentication error" }] })
-    const error = await Effect.runPromise(
-      checkDomains.pipe(Effect.flip, Effect.provide(respondingWith(() => body)))
-    )
-    expect(error._tag).toBe("CloudflareError")
-    expect(error.detail).toBe("10000: Authentication error")
-  })
+  it.effect("surfaces API error messages as CloudflareError", () =>
+    Effect.gen(function*() {
+      const body = json({ success: false, errors: [{ code: 10000, message: "Authentication error" }] })
+      const error = yield* checkDomains.pipe(Effect.flip, Effect.provide(respondingWith(() => body)))
+      strictEqual(error._tag, "CloudflareError")
+      strictEqual(error.detail, "10000: Authentication error")
+    }))
 
-  test("includes the HTTP status when the body does not decode", async () => {
-    const body = new Response("rate limited", { status: 200 })
-    const error = await Effect.runPromise(
-      checkDomains.pipe(Effect.flip, Effect.provide(respondingWith(() => body)))
-    )
-    expect(error.detail).toStartWith("HTTP 200:")
-  })
+  it.effect("includes the HTTP status when the body does not decode", () =>
+    Effect.gen(function*() {
+      const error = yield* checkDomains.pipe(
+        Effect.flip,
+        Effect.provide(respondingWith(() => new Response("rate limited", { status: 200 })))
+      )
+      assertTrue(error.detail.startsWith("HTTP 200:"))
+    }))
+
+  it.effect("retries transient statuses with exponential backoff", () =>
+    Effect.gen(function*() {
+      let calls = 0
+      const flaky = respondingWith(() => {
+        calls = calls + 1
+        return calls <= 2
+          ? new Response("slow down", { status: 429 })
+          : json({ success: true, result: [{ name: "acme.day", registrable: true }] })
+      })
+      const fiber = yield* checkDomains.pipe(Effect.provide(flaky), Effect.forkChild)
+      yield* TestClock.adjust("2 seconds")
+      yield* TestClock.adjust("4 seconds")
+      const result = yield* Fiber.join(fiber)
+      strictEqual(calls, 3)
+      deepStrictEqual(result.map((domain) => domain.name), ["acme.day"])
+    }))
 })
 
 describe("verifyToken", () => {
@@ -70,19 +86,19 @@ describe("verifyToken", () => {
     return yield* cloudflare.verifyToken(Redacted.make("token"))
   })
 
-  test("true when the API confirms the token", async () => {
-    const result = await Effect.runPromise(
-      verify.pipe(Effect.provide(respondingWith(() => json({ success: true }))))
-    )
-    expect(result).toBe(true)
-  })
+  it.effect("true when the API confirms the token", () =>
+    Effect.gen(function*() {
+      const result = yield* verify.pipe(Effect.provide(respondingWith(() => json({ success: true }))))
+      strictEqual(result, true)
+    }))
 
-  test("false when the response is garbage", async () => {
-    const result = await Effect.runPromise(
-      verify.pipe(Effect.provide(respondingWith(() => new Response("nope", { status: 200 }))))
-    )
-    expect(result).toBe(false)
-  })
+  it.effect("false when the response is garbage", () =>
+    Effect.gen(function*() {
+      const result = yield* verify.pipe(
+        Effect.provide(respondingWith(() => new Response("nope", { status: 200 })))
+      )
+      strictEqual(result, false)
+    }))
 })
 
 describe("listAccounts", () => {
@@ -91,15 +107,17 @@ describe("listAccounts", () => {
     return yield* cloudflare.listAccounts(Redacted.make("token"))
   })
 
-  test("returns accounts on success", async () => {
-    const body = json({ success: true, result: [{ id: "abc", name: "Main" }] })
-    const result = await Effect.runPromise(list.pipe(Effect.provide(respondingWith(() => body))))
-    expect(result.map((account) => account.name)).toEqual(["Main"])
-  })
+  it.effect("returns accounts on success", () =>
+    Effect.gen(function*() {
+      const body = json({ success: true, result: [{ id: "abc", name: "Main" }] })
+      const result = yield* list.pipe(Effect.provide(respondingWith(() => body)))
+      deepStrictEqual(result.map((account) => account.name), ["Main"])
+    }))
 
-  test("returns [] when the token cannot list accounts", async () => {
-    const body = json({ success: false, errors: [] })
-    const result = await Effect.runPromise(list.pipe(Effect.provide(respondingWith(() => body))))
-    expect(result).toEqual([])
-  })
+  it.effect("returns [] when the token cannot list accounts", () =>
+    Effect.gen(function*() {
+      const body = json({ success: false, errors: [] })
+      const result = yield* list.pipe(Effect.provide(respondingWith(() => body)))
+      deepStrictEqual(result, [])
+    }))
 })

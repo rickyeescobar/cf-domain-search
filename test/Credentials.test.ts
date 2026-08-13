@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test"
+import { describe, it } from "@effect/vitest"
+import { assertNone, assertTrue, strictEqual } from "@effect/vitest/utils"
 import { ConfigProvider, Effect, FileSystem, Layer, Option, Path, Redacted } from "effect"
 import { CredentialStore } from "../src/Credentials.ts"
 
@@ -24,51 +25,56 @@ const load = Effect.gen(function*() {
 const storedJson = JSON.stringify({ api_token: "stored-token", account_id: "stored-account" })
 
 describe("load", () => {
-  test("environment variables win", async () => {
-    const result = await Effect.runPromise(load.pipe(Effect.provide(Layer.mergeAll(
-      storeLayer({ readFileString: () => Effect.succeed(storedJson) }),
-      environment({ CLOUDFLARE_API_TOKEN: "env-token", CLOUDFLARE_ACCOUNT_ID: "env-account" })
-    ))))
-    const credentials = Option.getOrThrow(result)
-    expect(Redacted.value(credentials.token)).toBe("env-token")
-    expect(credentials.accountId).toBe("env-account")
-  })
+  it.effect("environment variables win", () =>
+    Effect.gen(function*() {
+      const result = yield* load.pipe(Effect.provide(Layer.mergeAll(
+        storeLayer({ readFileString: () => Effect.succeed(storedJson) }),
+        environment({ CLOUDFLARE_API_TOKEN: "env-token", CLOUDFLARE_ACCOUNT_ID: "env-account" })
+      )))
+      const credentials = Option.getOrThrow(result)
+      strictEqual(Redacted.value(credentials.token), "env-token")
+      strictEqual(credentials.accountId, "env-account")
+    }))
 
-  test("falls back to the saved config file", async () => {
-    const result = await Effect.runPromise(load.pipe(Effect.provide(Layer.mergeAll(
-      storeLayer({ readFileString: () => Effect.succeed(storedJson) }),
-      environment({})
-    ))))
-    const credentials = Option.getOrThrow(result)
-    expect(Redacted.value(credentials.token)).toBe("stored-token")
-    expect(credentials.accountId).toBe("stored-account")
-  })
+  it.effect("falls back to the saved config file", () =>
+    Effect.gen(function*() {
+      const result = yield* load.pipe(Effect.provide(Layer.mergeAll(
+        storeLayer({ readFileString: () => Effect.succeed(storedJson) }),
+        environment({})
+      )))
+      const credentials = Option.getOrThrow(result)
+      strictEqual(Redacted.value(credentials.token), "stored-token")
+      strictEqual(credentials.accountId, "stored-account")
+    }))
 
-  test("merges per field: env token with stored account id", async () => {
-    const result = await Effect.runPromise(load.pipe(Effect.provide(Layer.mergeAll(
-      storeLayer({ readFileString: () => Effect.succeed(JSON.stringify({ account_id: "stored-account" })) }),
-      environment({ CLOUDFLARE_API_TOKEN: "env-token" })
-    ))))
-    const credentials = Option.getOrThrow(result)
-    expect(Redacted.value(credentials.token)).toBe("env-token")
-    expect(credentials.accountId).toBe("stored-account")
-  })
+  it.effect("merges per field: env token with stored account id", () =>
+    Effect.gen(function*() {
+      const result = yield* load.pipe(Effect.provide(Layer.mergeAll(
+        storeLayer({ readFileString: () => Effect.succeed(JSON.stringify({ account_id: "stored-account" })) }),
+        environment({ CLOUDFLARE_API_TOKEN: "env-token" })
+      )))
+      const credentials = Option.getOrThrow(result)
+      strictEqual(Redacted.value(credentials.token), "env-token")
+      strictEqual(credentials.accountId, "stored-account")
+    }))
 
-  test("none when no source provides both values", async () => {
-    const result = await Effect.runPromise(load.pipe(Effect.provide(Layer.mergeAll(
-      storeLayer({}),
-      environment({ CLOUDFLARE_ACCOUNT_ID: "env-account" })
-    ))))
-    expect(Option.isNone(result)).toBe(true)
-  })
+  it.effect("none when no source provides both values", () =>
+    Effect.gen(function*() {
+      const result = yield* load.pipe(Effect.provide(Layer.mergeAll(
+        storeLayer({}),
+        environment({ CLOUDFLARE_ACCOUNT_ID: "env-account" })
+      )))
+      assertNone(result)
+    }))
 
-  test("ignores an unreadable config file", async () => {
-    const result = await Effect.runPromise(load.pipe(Effect.provide(Layer.mergeAll(
-      storeLayer({ readFileString: () => Effect.succeed("not json at all") }),
-      environment({})
-    ))))
-    expect(Option.isNone(result)).toBe(true)
-  })
+  it.effect("ignores an unreadable config file", () =>
+    Effect.gen(function*() {
+      const result = yield* load.pipe(Effect.provide(Layer.mergeAll(
+        storeLayer({ readFileString: () => Effect.succeed("not json at all") }),
+        environment({})
+      )))
+      assertNone(result)
+    }))
 })
 
 describe("clear", () => {
@@ -77,21 +83,23 @@ describe("clear", () => {
     return yield* store.clear
   })
 
-  test("removes the config file when it exists", async () => {
-    const removed: Array<string> = []
-    const result = await Effect.runPromise(clear.pipe(Effect.provide(storeLayer({
-      exists: () => Effect.succeed(true),
-      remove: (path) => Effect.sync(() => void removed.push(path))
-    }))))
-    expect(result).toBe(true)
-    expect(removed).toHaveLength(1)
-    expect(removed.map((path) => path.endsWith("config.json"))).toEqual([true])
-  })
+  it.effect("removes the config file when it exists", () =>
+    Effect.gen(function*() {
+      const removed: Array<string> = []
+      const result = yield* clear.pipe(Effect.provide(storeLayer({
+        exists: () => Effect.succeed(true),
+        remove: (path) => Effect.sync(() => void removed.push(path))
+      })))
+      strictEqual(result, true)
+      strictEqual(removed.length, 1)
+      assertTrue(removed[0]?.endsWith("config.json"))
+    }))
 
-  test("reports when there was nothing to remove", async () => {
-    const result = await Effect.runPromise(clear.pipe(Effect.provide(storeLayer({
-      exists: () => Effect.succeed(false)
-    }))))
-    expect(result).toBe(false)
-  })
+  it.effect("reports when there was nothing to remove", () =>
+    Effect.gen(function*() {
+      const result = yield* clear.pipe(Effect.provide(storeLayer({
+        exists: () => Effect.succeed(false)
+      })))
+      strictEqual(result, false)
+    }))
 })

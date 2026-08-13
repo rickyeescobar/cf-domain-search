@@ -1,5 +1,7 @@
-import { describe, expect, test } from "bun:test"
+import { describe, it } from "@effect/vitest"
+import { assertFalse, assertTrue, deepStrictEqual, strictEqual } from "@effect/vitest/utils"
 import { Effect, Layer } from "effect"
+import { TestConsole } from "effect/testing"
 import { HttpClient, HttpClientResponse } from "effect/unstable/http"
 import { plain, Style } from "../src/Style.ts"
 import * as Tlds from "../src/Tlds.ts"
@@ -10,37 +12,38 @@ const clientLayer = (body: () => Response) =>
   )
 
 describe("tlds", () => {
-  test("has no duplicates", () => {
-    expect(new Set(Tlds.tlds).size).toBe(Tlds.tlds.length)
+  it("has no duplicates", () => {
+    strictEqual(new Set(Tlds.tlds).size, Tlds.tlds.length)
   })
 
-  test("is normalized: lowercase, trimmed, no leading dot", () => {
+  it("is normalized: lowercase, trimmed, no leading dot", () => {
     for (const tld of Tlds.tlds) {
-      expect(tld).toBe(tld.trim().toLowerCase())
-      expect(tld.startsWith(".")).toBe(false)
+      strictEqual(tld, tld.trim().toLowerCase())
+      assertFalse(tld.startsWith("."))
     }
   })
 })
 
 describe("fetchLive", () => {
-  test("returns the feed's keys", async () => {
-    const body = new Response(JSON.stringify({ com: {}, dev: {} }), {
-      status: 200,
-      headers: { "content-type": "application/json" }
-    })
-    const result = await Effect.runPromise(
-      Tlds.fetchLive.pipe(Effect.provide(clientLayer(() => body)))
-    )
-    expect(result).toEqual(["com", "dev"])
-  })
+  it.effect("returns the feed's keys", () =>
+    Effect.gen(function*() {
+      const body = new Response(JSON.stringify({ com: {}, dev: {} }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      })
+      const result = yield* Tlds.fetchLive.pipe(Effect.provide(clientLayer(() => body)))
+      deepStrictEqual(result, ["com", "dev"])
+    }))
 
-  test("warns and falls back to [] when the feed is unusable", async () => {
-    const result = await Effect.runPromise(
-      Tlds.fetchLive.pipe(
+  it.effect("warns and falls back to [] when the feed is unusable", () =>
+    Effect.gen(function*() {
+      const result = yield* Tlds.fetchLive.pipe(
         Effect.provideService(Style, plain),
         Effect.provide(clientLayer(() => new Response("oops", { status: 200 })))
       )
-    )
-    expect(result).toEqual([])
-  })
+      deepStrictEqual(result, [])
+      const errors = yield* TestConsole.errorLines
+      strictEqual(errors.length, 1)
+      assertTrue(String(errors[0]).startsWith("warning: could not fetch live TLD list"))
+    }))
 })

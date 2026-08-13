@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test"
+import { describe, it } from "@effect/vitest"
+import { assertFalse, assertInclude, assertTrue, strictEqual } from "@effect/vitest/utils"
 import { CheckedDomain, Pricing } from "../src/Cloudflare.ts"
 import { money, purchaseUrl, render } from "../src/Report.ts"
 import { plain } from "../src/Style.ts"
@@ -20,82 +21,82 @@ const sh = new CheckedDomain({ name: "acme.sh", registrable: false, reason: "ext
 const results = [day, bid, com, sh]
 
 describe("render", () => {
-  test("groups results and sorts available cheapest first", () => {
+  it("groups results and sorts available cheapest first", () => {
     const output = render(results, [], options, plain)
-    expect(output).toContain("Available (2)")
-    expect(output).toContain("Taken (1)")
-    expect(output).toContain("Not supported via API (1)")
-    expect(output.indexOf("acme.bid")).toBeLessThan(output.indexOf("acme.day"))
-    expect(output).toContain("2 available · 1 taken · 1 unsupported · cheapest: acme.bid at $4.18/yr")
-    expect(output).toContain(`buy: ${purchaseUrl("acct", "acme")}`)
+    assertInclude(output, "Available (2)")
+    assertInclude(output, "Taken (1)")
+    assertInclude(output, "Not supported via API (1)")
+    assertTrue(output.indexOf("acme.bid") < output.indexOf("acme.day"))
+    assertInclude(output, "2 available · 1 taken · 1 unsupported · cheapest: acme.bid at $4.18/yr")
+    assertInclude(output, `buy: ${purchaseUrl("acct", "acme")}`)
   })
 
-  test("availableOnly hides taken and unsupported groups", () => {
+  it("availableOnly hides taken and unsupported groups", () => {
     const output = render(results, [], { ...options, availableOnly: true }, plain)
-    expect(output).not.toContain("Taken")
-    expect(output).not.toContain("Not supported")
-    expect(output).toContain("1 taken · 1 unsupported")
+    assertFalse(output.includes("Taken"))
+    assertFalse(output.includes("Not supported"))
+    assertInclude(output, "1 taken · 1 unsupported")
   })
 
-  test("links prints a purchase url under each available domain", () => {
+  it("links prints a purchase url under each available domain", () => {
     const output = render(results, [], { ...options, links: true }, plain)
-    expect(output).toContain(purchaseUrl("acct", "acme.bid"))
-    expect(output).toContain(purchaseUrl("acct", "acme.day"))
-    expect(output).not.toContain(purchaseUrl("acct", "acme.com"))
+    assertInclude(output, purchaseUrl("acct", "acme.bid"))
+    assertInclude(output, purchaseUrl("acct", "acme.day"))
+    assertFalse(output.includes(purchaseUrl("acct", "acme.com")))
   })
 
-  test("flags premium tiers", () => {
+  it("flags premium tiers", () => {
     const premium = [
       new CheckedDomain({ name: "acme.inc", registrable: true, tier: "premium", pricing: pricing("2000.20") })
     ]
     const output = render(premium, [], options, plain)
-    expect(output).toContain("[premium tier]")
-    expect(output).toContain("$2,000.20")
+    assertInclude(output, "[premium tier]")
+    assertInclude(output, "$2,000.20")
   })
 
-  test("frowns when nothing is available", () => {
+  it("frowns when nothing is available", () => {
     const output = render([com, sh], [], options, plain)
-    expect(output).toContain("No available domains found  :(")
+    assertInclude(output, "No available domains found  :(")
   })
 
-  test("renders batch failures and keeps the summary", () => {
+  it("renders batch failures and keeps the summary", () => {
     const failures = [{ domains: ["acme.a", "acme.b"], message: "boom" }]
     const output = render(results, failures, options, plain)
-    expect(output).toContain("error: batch [acme.a … acme.b] failed: boom")
-    expect(output).toContain("2 available")
+    assertInclude(output, "error: batch [acme.a … acme.b] failed: boom")
+    assertInclude(output, "2 available")
   })
 
   describe("exact single-domain checks", () => {
-    test("available domain gets a verdict with price and purchase url", () => {
+    it("available domain gets a verdict with price and purchase url", () => {
       const output = render([day], [], { ...options, name: "acme.day" }, plain)
-      expect(output).toContain("acme.day is AVAILABLE — $10.20/yr")
-      expect(output).toContain("renews $10.20/yr")
-      expect(output).toContain(purchaseUrl("acct", "acme.day"))
-      expect(output).not.toContain("Available (")
+      assertInclude(output, "acme.day is AVAILABLE — $10.20/yr")
+      assertInclude(output, "renews $10.20/yr")
+      assertInclude(output, purchaseUrl("acct", "acme.day"))
+      assertFalse(output.includes("Available ("))
     })
 
-    test("taken domain gets a frown", () => {
+    it("taken domain gets a frown", () => {
       const output = render([com], [], { ...options, name: "acme.com" }, plain)
-      expect(output).toContain("acme.com is taken  :(")
+      assertInclude(output, "acme.com is taken  :(")
     })
 
-    test("unsupported domain points at the dashboard", () => {
+    it("unsupported domain points at the dashboard", () => {
       const output = render([sh], [], { ...options, name: "acme.sh" }, plain)
-      expect(output).toContain("can't be checked via the API")
-      expect(output).toContain(purchaseUrl("acct", "acme.sh"))
+      assertInclude(output, "can't be checked via the API")
+      assertInclude(output, purchaseUrl("acct", "acme.sh"))
     })
   })
 })
 
 describe("money", () => {
-  test("formats numeric strings and numbers with separators", () => {
-    expect(money("10.20")).toBe("$10.20")
-    expect(money(4.18)).toBe("$4.18")
-    expect(money("2000.2")).toBe("$2,000.20")
+  it("formats numeric strings and numbers with separators", () => {
+    strictEqual(money("10.20"), "$10.20")
+    strictEqual(money(4.18), "$4.18")
+    strictEqual(money("2000.2"), "$2,000.20")
   })
 
-  test("passes through the unknowns", () => {
-    expect(money(undefined)).toBe("?")
-    expect(money("free")).toBe("free")
+  it("passes through the unknowns", () => {
+    strictEqual(money(undefined), "?")
+    strictEqual(money("free"), "free")
   })
 })
