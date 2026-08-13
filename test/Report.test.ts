@@ -18,16 +18,18 @@ const day = new CheckedDomain({ name: "acme.day", registrable: true, tier: "stan
 const bid = new CheckedDomain({ name: "acme.bid", registrable: true, tier: "standard", pricing: pricing("4.18") })
 const com = new CheckedDomain({ name: "acme.com", registrable: false, reason: "domain_unavailable" })
 const sh = new CheckedDomain({ name: "acme.sh", registrable: false, reason: "extension_not_supported_via_api" })
+const zone = new CheckedDomain({ name: "acme.zone", registrable: true, tier: "standard", pricing: pricing("2.00") })
 const results = [day, bid, com, sh]
 
 describe("render", () => {
-  it("groups results and sorts available cheapest first", () => {
-    const output = render(results, [], options, plain)
-    assertInclude(output, "Available (2)")
+  it("groups results, sorts available alphabetically, summarizes the cheapest", () => {
+    const output = render([...results, zone], [], options, plain)
+    assertInclude(output, "Available (3)")
     assertInclude(output, "Taken (1)")
     assertInclude(output, "Not supported via API (1)")
     assertTrue(output.indexOf("acme.bid") < output.indexOf("acme.day"))
-    assertInclude(output, "2 available · 1 taken · 1 unsupported · cheapest: acme.bid at $4.18/yr")
+    assertTrue(output.indexOf("acme.day") < output.indexOf("acme.zone"))
+    assertInclude(output, "3 available · 1 taken · 1 unsupported · cheapest: acme.zone at $2.00/yr")
     assertInclude(output, `buy: ${purchaseUrl("acct", "acme")}`)
   })
 

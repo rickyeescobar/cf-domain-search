@@ -217,7 +217,8 @@ const check = Effect.fn(function*(input: {
   const { results, failures } = yield* sweep(credentials, targets, showProgress)
 
   if (input.json) {
-    const selected = input.available ? results.filter((d) => d.registrable) : results
+    const selected = (input.available ? results.filter((d) => d.registrable) : results)
+      .toSorted((a, b) => a.name.localeCompare(b.name))
     const payload = selected.map((d) =>
       d.registrable
         ? { ...d, purchase_url: purchaseUrl(credentials.accountId, d.name) }

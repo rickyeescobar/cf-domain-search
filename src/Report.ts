@@ -86,7 +86,7 @@ export const render = (
 
   const available = results
     .filter((d) => d.registrable)
-    .toSorted((a, b) => registrationCost(a) - registrationCost(b))
+    .toSorted((a, b) => a.name.localeCompare(b.name))
   const taken = results
     .filter((d) => !d.registrable && d.reason !== UNSUPPORTED)
     .toSorted((a, b) => a.name.localeCompare(b.name))
@@ -141,7 +141,7 @@ export const render = (
     )
   }
 
-  const cheapest = available[0]
+  const cheapest = available.toSorted((a, b) => registrationCost(a) - registrationCost(b))[0]
   lines.push("")
   lines.push(
     `${bold(String(available.length))} available · ${taken.length} taken · ` +

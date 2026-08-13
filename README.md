@@ -41,8 +41,8 @@ cfdomains myname --live-tlds        # merge the latest TLD list from cfdomainpri
 
 Results come back in three groups:
 
-- **Available** — sorted cheapest first, with registration and renewal prices; premium
-  tiers are flagged.
+- **Available** — sorted alphabetically, with registration and renewal prices; premium
+  tiers are flagged and the summary line calls out the cheapest find.
 - **Taken** — already registered.
 - **Unsupported** — TLDs the beta API can't check yet. These may still be purchasable in
   the dashboard; the summary line prints the purchase URL.
