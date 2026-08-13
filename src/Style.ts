@@ -14,6 +14,8 @@ export interface Style {
   readonly yellow: (text: string) => string
   readonly dim: (text: string) => string
   readonly bold: (text: string) => string
+  /** OSC 8 terminal hyperlink; plain style returns the text untouched. */
+  readonly link: (text: string, url: string) => string
 }
 
 const paint = (code: string) => (text: string): string => `\x1b[${code}m${text}\x1b[0m`
@@ -24,7 +26,8 @@ export const colored: Style = {
   red: paint("31"),
   yellow: paint("33"),
   dim: paint("2"),
-  bold: paint("1")
+  bold: paint("1"),
+  link: (text, url) => `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`
 }
 
 export const plain: Style = {
@@ -32,7 +35,8 @@ export const plain: Style = {
   red: identity,
   yellow: identity,
   dim: identity,
-  bold: identity
+  bold: identity,
+  link: identity
 }
 
 export const Style = Context.Reference<Style>("cfdomains/Style", {

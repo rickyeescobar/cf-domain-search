@@ -32,7 +32,8 @@ cfdomains myname                    # sweep all 423 TLDs (takes a few seconds)
 cfdomains myname --available        # only show the available ones
 cfdomains myname --tlds com,dev,io  # check specific TLDs
 cfdomains myname.dev                # exact single-domain check
-cfdomains myname --json             # machine-readable output
+cfdomains myname --links            # print a purchase link under each available domain
+cfdomains myname --json             # machine-readable output (with purchase_url per domain)
 cfdomains myname --live-tlds        # merge the latest TLD list from cfdomainpricing.com
 ```
 
@@ -43,6 +44,12 @@ Results come back in three groups:
 - **Taken** — already registered.
 - **Unsupported** — TLDs the beta API can't check yet. These may still be purchasable in
   the dashboard; the summary line prints the purchase URL.
+
+In terminals that support [OSC 8 hyperlinks](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda)
+(iTerm2, Ghostty, recent Terminal.app), every available domain name is directly clickable —
+it opens the Cloudflare purchase page for that exact domain. `--links` prints the same
+URLs as visible text, and `--json` always includes them as `purchase_url`, so scripts and
+agents get the links too.
 
 Also built in: `--help`, `--version`, `--no-color` (or the `NO_COLOR` env var),
 `--wizard` for guided flag entry, and `--completions bash|zsh|fish|sh`.

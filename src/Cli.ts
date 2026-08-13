@@ -6,7 +6,7 @@ import { Array as Arr, Config, Console, Data, Effect, Option, Redacted, Result, 
 import { Argument, CliError, Command, Flag, GlobalFlag } from "effect/unstable/cli"
 import { CheckedDomain, Cloudflare, type CloudflareError } from "./Cloudflare.ts"
 import { CredentialStore, type Credentials } from "./Credentials.ts"
-import { render, type BatchFailure } from "./Report.ts"
+import { purchaseUrl, render, type BatchFailure } from "./Report.ts"
 import { wizard } from "./Setup.ts"
 import { plain, Style } from "./Style.ts"
 import * as Tlds from "./Tlds.ts"
@@ -33,7 +33,11 @@ const flags = {
     Flag.withDescription("Only show available domains")
   ),
   json: Flag.boolean("json").pipe(
-    Flag.withDescription("Machine-readable output")
+    Flag.withDescription("Machine-readable output (includes purchase_url per available domain)")
+  ),
+  links: Flag.boolean("links").pipe(
+    Flag.withAlias("l"),
+    Flag.withDescription("Print a purchase link under each available domain")
   ),
   tlds: Flag.string("tlds").pipe(
     Flag.withDescription("Restrict to a comma-separated list of TLDs, e.g. com,dev,io"),
@@ -169,6 +173,7 @@ const check = Effect.fn(function*(input: {
   readonly name: string
   readonly available: boolean
   readonly json: boolean
+  readonly links: boolean
   readonly tlds: Option.Option<ReadonlyArray<string>>
   readonly liveTlds: boolean
   readonly token: Option.Option<Redacted.Redacted>
@@ -183,7 +188,12 @@ const check = Effect.fn(function*(input: {
   const { results, failures } = yield* sweep(credentials, targets, showProgress)
 
   if (input.json) {
-    const payload = input.available ? results.filter((d) => d.registrable) : results
+    const selected = input.available ? results.filter((d) => d.registrable) : results
+    const payload = selected.map((d) =>
+      d.registrable
+        ? { ...d, purchase_url: purchaseUrl(credentials.accountId, d.name) }
+        : d
+    )
     yield* Console.log(JSON.stringify(payload, null, 2))
     if (failures.length > 0) {
       yield* Console.error(JSON.stringify({ errors: failures }, null, 2))
@@ -193,7 +203,8 @@ const check = Effect.fn(function*(input: {
     yield* Console.log(render(results, failures, {
       name: query,
       availableOnly: input.available,
-      accountId: credentials.accountId
+      accountId: credentials.accountId,
+      links: input.links
     }, style))
   }
   if (failures.length > 0) {
@@ -212,6 +223,7 @@ export const cfdomains = Command.make("cfdomains", { name, ...flags }, (input) =
       { command: "cfdomains myname", description: "Check myname.<tld> for every known TLD" },
       { command: "cfdomains myname --available", description: "Only show available domains" },
       { command: "cfdomains myname --tlds com,dev,io", description: "Restrict to specific TLDs" },
+      { command: "cfdomains myname --links", description: "Show purchase links per domain" },
       { command: "cfdomains myname.dev", description: "Check a single exact domain" },
       { command: "cfdomains setup", description: "Interactive credential setup" }
     ])

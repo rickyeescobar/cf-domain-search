@@ -12,6 +12,10 @@ export interface BatchFailure {
 
 const UNSUPPORTED = "extension_not_supported_via_api"
 
+/** Dashboard purchase page, pre-filtered to a name or exact domain. */
+export const purchaseUrl = (accountId: string, query: string): string =>
+  `https://dash.cloudflare.com/${accountId}/domains/registrations/purchase?query=${query}`
+
 export const money = (value: string | number | undefined): string => {
   if (value === undefined) return "?"
   const parsed = Number(value)
@@ -39,10 +43,15 @@ const wrapList = (
 export const render = (
   results: ReadonlyArray<CheckedDomain>,
   failures: ReadonlyArray<BatchFailure>,
-  options: { readonly name: string; readonly availableOnly: boolean; readonly accountId: string },
+  options: {
+    readonly name: string
+    readonly availableOnly: boolean
+    readonly accountId: string
+    readonly links: boolean
+  },
   style: Style
 ): string => {
-  const { bold, dim, green, red, yellow } = style
+  const { bold, dim, green, link, red, yellow } = style
   const available = results
     .filter((d) => d.registrable)
     .toSorted((a, b) => registrationCost(a) - registrationCost(b))
@@ -65,10 +74,16 @@ export const render = (
       const premium = domain.tier !== undefined && domain.tier !== "standard"
         ? yellow(` [${domain.tier} tier]`)
         : ""
+      const url = purchaseUrl(options.accountId, domain.name)
+      // Pad before wrapping in the OSC 8 link so escape codes don't skew width.
+      const padding = " ".repeat(width - domain.name.length)
       lines.push(
-        `  ${green("✔")} ${domain.name.padEnd(width)} ` +
+        `  ${green("✔")} ${link(domain.name, url)}${padding} ` +
           `${money(domain.pricing?.registration_cost).padStart(8)}  ${renewal}${premium}`
       )
+      if (options.links) {
+        lines.push(`    ${dim(url)}`)
+      }
     }
   } else {
     lines.push(bold("\nNo available domains found."))
