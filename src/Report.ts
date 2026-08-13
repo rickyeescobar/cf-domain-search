@@ -29,29 +29,6 @@ const registrationCost = (domain: CheckedDomain): number =>
     ? Number(domain.pricing.registration_cost)
     : Infinity
 
-const SPARKS = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-
-/**
- * A log-scaled price histogram: most prices cluster low with a few premium
- * spikes, so linear buckets would collapse everything into the first bar.
- */
-const sparkline = (costs: ReadonlyArray<number>, buckets = 12): string => {
-  const min = Math.min(...costs)
-  const max = Math.max(...costs)
-  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max || min <= 0) return ""
-  const lo = Math.log(min)
-  const span = Math.log(max) - lo
-  const counts = new Array<number>(buckets).fill(0)
-  for (const cost of costs) {
-    const bucket = Math.min(buckets - 1, Math.floor(((Math.log(cost) - lo) / span) * buckets))
-    counts[bucket] = (counts[bucket] ?? 0) + 1
-  }
-  const top = Math.max(...counts)
-  return counts
-    .map((n) => SPARKS[n === 0 ? 0 : Math.max(1, Math.round((n / top) * 7))] ?? "▁")
-    .join("")
-}
-
 const wrapList = (
   names: ReadonlyArray<string>,
   decorate: (line: string) => string,
@@ -173,11 +150,6 @@ export const render = (
         ? ` · cheapest: ${bold(cheapest.name)} at ${money(cheapest.pricing?.registration_cost)}/yr`
         : "")
   )
-  const costs = available.map(registrationCost).filter((cost) => Number.isFinite(cost))
-  const sparks = costs.length >= 8 ? sparkline(costs) : ""
-  if (sparks !== "") {
-    lines.push(dim(`prices ${money(Math.min(...costs))} – ${money(Math.max(...costs))}  ${sparks}`))
-  }
   lines.push(dim(`buy: ${purchaseUrl(options.accountId, options.name)}`))
 
   return lines.join("\n")

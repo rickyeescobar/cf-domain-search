@@ -15,6 +15,8 @@ interface Shot {
   readonly title: string
   readonly language: string
   readonly code: string
+  /** Frame width in px; set when long lines (the buy URL) must not wrap. */
+  readonly width?: number
 }
 
 const shots: ReadonlyArray<Shot> = [
@@ -22,6 +24,7 @@ const shots: ReadonlyArray<Shot> = [
     file: "docs/fullsweep.png",
     title: "cfdomains",
     language: "shell",
+    width: 1160,
     code: [
       "$ cfdomains malachi",
       "",
@@ -44,13 +47,14 @@ const shots: ReadonlyArray<Shot> = [
       "  · malachi.cc  malachi.giving  malachi.lol  malachi.mom  malachi.new  malachi.sh",
       "",
       "343 available · 74 taken · 6 unsupported · cheapest: malachi.bid at $4.18/yr",
-      "prices $4.18 – $2,000.20  ▂▂▃█▅▃▂▁▂▂▁▂"
+      "buy: https://dash.cloudflare.com/<account-id>/domains/registrations/purchase?query=malachi"
     ].join("\n")
   },
   {
     file: "docs/sweep.png",
     title: "cfdomains",
     language: "shell",
+    width: 1160,
     code: [
       "$ cfdomains malachi --tlds com,dev,io,app,day,page,rocks,ninja,haus",
       "",
@@ -64,7 +68,8 @@ const shots: ReadonlyArray<Shot> = [
       "Taken (4)",
       "  ✘ malachi.app  malachi.com  malachi.dev  malachi.io",
       "",
-      "5 available · 4 taken · 0 unsupported · cheapest: malachi.day at $10.20/yr"
+      "5 available · 4 taken · 0 unsupported · cheapest: malachi.day at $10.20/yr",
+      "buy: https://dash.cloudflare.com/<account-id>/domains/registrations/purchase?query=malachi"
     ].join("\n")
   },
   {
@@ -145,6 +150,8 @@ try {
       language: shot.language,
       code: Buffer.from(shot.code, "utf8").toString("base64")
     })
+    // The frame is otherwise capped at 920px by ray.so's outerFrame CSS.
+    if (shot.width !== undefined) params.set("width", String(shot.width))
     console.log(`→ ${shot.file}`)
     await page.goto(`https://ray.so/#${params.toString()}`, {
       waitUntil: "networkidle2",
@@ -161,7 +168,8 @@ try {
         "@font-face { font-family: BoxFix; src: local('Menlo'); unicode-range: U+2500-25FF; }",
         '[class*="Frame"] pre, [class*="Frame"] code, [class*="Frame"] textarea {',
         "  font-family: BoxFix, 'JetBrains Mono', monospace !important;",
-        "}"
+        "}",
+        '[class*="outerFrame"] { max-width: none !important; width: 100% !important }'
       ].join("\n")
     })
     await new Promise((resolve) => setTimeout(resolve, 500))
