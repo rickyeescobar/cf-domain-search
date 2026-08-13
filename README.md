@@ -5,7 +5,7 @@ cost — across all 423 [Cloudflare Registrar](https://developers.cloudflare.com
 TLDs, in one command.
 
 <p align="center">
-  <img src="docs/sweep.png" width="760" alt="cfdomains output: available domains sorted cheapest first, then taken domains, then a summary line">
+  <img src="docs/fullsweep.png" width="760" alt="cfdomains full-sweep output: 343 available domains sorted cheapest first, taken domains, unsupported TLDs, and a summary line">
 </p>
 
 Availability is authoritative — a live registry check through Cloudflare's Registrar API,
@@ -46,6 +46,13 @@ Results come back in three groups:
 
 Also built in: `--help`, `--version`, `--no-color` (or the `NO_COLOR` env var),
 `--wizard` for guided flag entry, and `--completions bash|zsh|fish|sh`.
+
+<details>
+<summary>What a scoped <code>--tlds</code> run looks like</summary>
+<p align="center">
+  <img src="docs/sweep.png" width="700" alt="cfdomains --tlds output: five available domains with prices and four taken domains">
+</p>
+</details>
 
 <details>
 <summary>What <code>--json</code> looks like</summary>

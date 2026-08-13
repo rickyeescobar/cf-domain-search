@@ -19,6 +19,34 @@ interface Shot {
 
 const shots: ReadonlyArray<Shot> = [
   {
+    file: "docs/fullsweep.png",
+    title: "cfdomains",
+    language: "shell",
+    code: [
+      "$ cfdomains malachi",
+      "",
+      "Available (343)",
+      "  ✔ malachi.bid                $4.18  renews $5.18/yr",
+      "  ✔ malachi.date               $4.18  renews $5.18/yr",
+      "  ✔ malachi.win                $4.18  renews $5.18/yr",
+      "  ✔ malachi.gripe              $5.20  renews $5.20/yr",
+      "  ✔ malachi.me.uk              $5.30  renews $5.30/yr",
+      "  ✔ malachi.observer           $9.20  renews $9.20/yr",
+      "  ✔ malachi.faith             $10.18  renews $10.18/yr",
+      "  ✔ malachi.day               $10.20  renews $10.20/yr",
+      "  ✔ malachi.page              $10.20  renews $10.20/yr",
+      "  … 334 more",
+      "",
+      "Taken (74)",
+      "  ✘ malachi.app  malachi.com  malachi.dev  malachi.io  …",
+      "",
+      "Not supported via API (6) — may still be purchasable in the dashboard",
+      "  · malachi.cc  malachi.giving  malachi.lol  malachi.mom  malachi.new  malachi.sh",
+      "",
+      "343 available · 74 taken · 6 unsupported · cheapest: malachi.bid at $4.18/yr"
+    ].join("\n")
+  },
+  {
     file: "docs/sweep.png",
     title: "cfdomains",
     language: "shell",
