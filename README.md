@@ -24,8 +24,8 @@ That's it. On first run with no credentials, an interactive wizard walks you thr
 creating a Cloudflare API token, verifies it live, finds your account, and saves the
 result to `~/.config/cf-domain-search/config.json`. Re-run it anytime with `cfdomains setup`.
 
-Requires Node ≥ 20 and a free Cloudflare account. Not on npm yet? Run it from a clone:
-`bun install && bun src/bin.ts myname`.
+Requires Node ≥ 20 and a free Cloudflare account. Prefer a permanent install?
+`npm install -g cf-domain-search` puts `cfdomains` on your PATH.
 
 ## Usage
 
