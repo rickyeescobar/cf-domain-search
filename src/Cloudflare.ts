@@ -96,9 +96,11 @@ export class Cloudflare extends Context.Service<Cloudflare, {
     Effect.gen(function*() {
       const client = (yield* HttpClient.HttpClient).pipe(
         HttpClient.mapRequest(HttpClientRequest.prependUrl(API_URL)),
+        // The Registrar API rate-limits aggressively on consecutive full
+        // sweeps; back off patiently (2s, 4s, 8s, 16s) before giving up.
         HttpClient.retryTransient({
-          schedule: Schedule.exponential("1 second"),
-          times: 2
+          schedule: Schedule.exponential("2 seconds"),
+          times: 4
         })
       )
 
@@ -128,7 +130,9 @@ export class Cloudflare extends Context.Service<Cloudflare, {
           Effect.mapError((error) => new CloudflareError({ detail: describe(error) })),
           Effect.flatMap((response) =>
             HttpClientResponse.schemaBodyJson(CheckEnvelope)(response).pipe(
-              Effect.mapError((error) => new CloudflareError({ detail: describe(error) })),
+              Effect.mapError((error) =>
+                new CloudflareError({ detail: `HTTP ${response.status}: ${describe(error)}` })
+              ),
               Effect.flatMap((body) => {
                 if (!body.success) {
                   return Effect.fail(
