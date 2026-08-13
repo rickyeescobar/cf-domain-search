@@ -43,7 +43,11 @@ const shots: ReadonlyArray<Shot> = [
       "Not supported via API (6) — may still be purchasable in the dashboard",
       "  · malachi.cc  malachi.giving  malachi.lol  malachi.mom  malachi.new  malachi.sh",
       "",
-      "343 available · 74 taken · 6 unsupported · cheapest: malachi.bid at $4.18/yr"
+      "╭──────────────────────────────────────────╮",
+      "│ 343 available · 74 taken · 6 unsupported │",
+      "│ cheapest: malachi.bid at $4.18/yr        │",
+      "│ prices $4.18 – $2,000.20  ▂▂▃█▅▃▂▁▂▂▁▂   │",
+      "╰──────────────────────────────────────────╯"
     ].join("\n")
   },
   {
@@ -63,7 +67,10 @@ const shots: ReadonlyArray<Shot> = [
       "Taken (4)",
       "  ✘ malachi.app  malachi.com  malachi.dev  malachi.io",
       "",
-      "5 available · 4 taken · 0 unsupported · cheapest: malachi.day at $10.20/yr"
+      "╭───────────────────────────────────────╮",
+      "│ 5 available · 4 taken · 0 unsupported │",
+      "│ cheapest: malachi.day at $10.20/yr    │",
+      "╰───────────────────────────────────────╯"
     ].join("\n")
   },
   {
@@ -151,9 +158,19 @@ try {
     })
     await new Promise((resolve) => setTimeout(resolve, 1500))
     // Hide the resize drag handles so they don't appear at the image edges.
+    // ray.so's JetBrains Mono webfont subset lacks box-drawing/block glyphs
+    // (╭─│▁▂█…), which would fall back to a wider font and break alignment —
+    // serve just that range from local Menlo, whose advance width matches.
     await page.addStyleTag({
-      content: '[class*="windowSizeDragPoint"] { display: none !important }'
+      content: [
+        '[class*="windowSizeDragPoint"] { display: none !important }',
+        "@font-face { font-family: BoxFix; src: local('Menlo'); unicode-range: U+2500-25FF; }",
+        '[class*="Frame"] pre, [class*="Frame"] code, [class*="Frame"] textarea {',
+        "  font-family: BoxFix, 'JetBrains Mono', monospace !important;",
+        "}"
+      ].join("\n")
     })
+    await new Promise((resolve) => setTimeout(resolve, 500))
     const frame = await page.$('[class*="DefaultFrame-module"]')
     if (frame === null) throw new Error(`${shot.file}: ray.so frame element not found`)
     await frame.screenshot({ path: shot.file as `${string}.png` })

@@ -19,13 +19,53 @@ export const purchaseUrl = (accountId: string, query: string): string =>
 export const money = (value: string | number | undefined): string => {
   if (value === undefined) return "?"
   const parsed = Number(value)
-  return Number.isNaN(parsed) ? String(value) : `$${parsed.toFixed(2)}`
+  return Number.isNaN(parsed)
+    ? String(value)
+    : `$${parsed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 const registrationCost = (domain: CheckedDomain): number =>
   domain.pricing?.registration_cost !== undefined
     ? Number(domain.pricing.registration_cost)
     : Infinity
+
+const SPARKS = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+
+/**
+ * A log-scaled price histogram: most prices cluster low with a few premium
+ * spikes, so linear buckets would collapse everything into the first bar.
+ */
+const sparkline = (costs: ReadonlyArray<number>, buckets = 12): string => {
+  const min = Math.min(...costs)
+  const max = Math.max(...costs)
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max || min <= 0) return ""
+  const lo = Math.log(min)
+  const span = Math.log(max) - lo
+  const counts = new Array<number>(buckets).fill(0)
+  for (const cost of costs) {
+    const bucket = Math.min(buckets - 1, Math.floor(((Math.log(cost) - lo) / span) * buckets))
+    counts[bucket] = (counts[bucket] ?? 0) + 1
+  }
+  const top = Math.max(...counts)
+  return counts
+    .map((n) => SPARKS[n === 0 ? 0 : Math.max(1, Math.round((n / top) * 7))] ?? "▁")
+    .join("")
+}
+
+/** Rounded box; padding is computed from the unstyled text so ANSI codes don't skew it. */
+const box = (
+  content: ReadonlyArray<{ readonly plain: string; readonly styled: string }>,
+  frame: (line: string) => string
+): ReadonlyArray<string> => {
+  const inner = Math.max(...content.map((l) => l.plain.length))
+  return [
+    frame(`╭${"─".repeat(inner + 2)}╮`),
+    ...content.map((l) =>
+      `${frame("│")} ${l.styled}${" ".repeat(inner - l.plain.length)} ${frame("│")}`
+    ),
+    frame(`╰${"─".repeat(inner + 2)}╯`)
+  ]
+}
 
 const wrapList = (
   names: ReadonlyArray<string>,
@@ -52,6 +92,36 @@ export const render = (
   style: Style
 ): string => {
   const { bold, dim, green, link, red, yellow } = style
+
+  // An exact single-domain check gets a verdict, not a table.
+  const only = results[0]
+  if (options.name.includes(".") && results.length === 1 && only !== undefined) {
+    const url = purchaseUrl(options.accountId, only.name)
+    if (only.registrable) {
+      const price = money(only.pricing?.registration_cost)
+      const renewal = only.pricing !== undefined
+        ? `renews ${money(only.pricing.renewal_cost)}/yr`
+        : ""
+      const premium = only.tier !== undefined && only.tier !== "standard"
+        ? yellow(`${renewal === "" ? "" : " · "}${only.tier} tier`)
+        : ""
+      return [
+        "",
+        `  ✨  ${bold(green(link(only.name, url)))} is ${bold(green("AVAILABLE"))} — ${bold(`${price}/yr`)}  ✨`,
+        ...renewal !== "" || premium !== "" ? [`      ${dim(renewal)}${premium}`] : [],
+        `      ${dim(url)}`
+      ].join("\n")
+    }
+    if (only.reason === UNSUPPORTED) {
+      return [
+        "",
+        `  ${dim("·")} ${bold(only.name)} can't be checked via the API — it may still be available:`,
+        `    ${dim(url)}`
+      ].join("\n")
+    }
+    return `\n  ${red("✘")} ${bold(only.name)} is taken  ${red(":(")}`
+  }
+
   const available = results
     .filter((d) => d.registrable)
     .toSorted((a, b) => registrationCost(a) - registrationCost(b))
@@ -86,7 +156,7 @@ export const render = (
       }
     }
   } else {
-    lines.push(bold("\nNo available domains found."))
+    lines.push(bold("\nNo available domains found") + `  ${red(":(")}`)
   }
 
   if (!options.availableOnly) {
@@ -110,17 +180,30 @@ export const render = (
   }
 
   const cheapest = available[0]
+  const stats = `available · ${taken.length} taken · ${unsupported.length} unsupported`
+  const summary = [{
+    plain: `${available.length} ${stats}`,
+    styled: `${bold(String(available.length))} ${stats}`
+  }]
+  if (cheapest !== undefined) {
+    const price = `${money(cheapest.pricing?.registration_cost)}/yr`
+    summary.push({
+      plain: `cheapest: ${cheapest.name} at ${price}`,
+      styled: `cheapest: ${bold(cheapest.name)} at ${price}`
+    })
+  }
+  const costs = available.map(registrationCost).filter((cost) => Number.isFinite(cost))
+  const sparks = costs.length >= 8 ? sparkline(costs) : ""
+  if (sparks !== "") {
+    const range = `${money(Math.min(...costs))} – ${money(Math.max(...costs))}`
+    summary.push({
+      plain: `prices ${range}  ${sparks}`,
+      styled: `prices ${range}  ${dim(sparks)}`
+    })
+  }
   lines.push("")
-  lines.push(
-    `${bold(String(available.length))} available · ${taken.length} taken · ` +
-      `${unsupported.length} unsupported` +
-      (cheapest !== undefined
-        ? ` · cheapest: ${bold(cheapest.name)} at ${money(cheapest.pricing?.registration_cost)}/yr`
-        : "")
-  )
-  lines.push(dim(
-    `buy: https://dash.cloudflare.com/${options.accountId}/domains/registrations/purchase?query=${options.name}`
-  ))
+  lines.push(...box(summary, dim))
+  lines.push(dim(`buy: ${purchaseUrl(options.accountId, options.name)}`))
 
   return lines.join("\n")
 }

@@ -13,6 +13,12 @@ import * as Tlds from "./Tlds.ts"
 
 const BATCH_SIZE = 20 // domain-check API maximum per request
 const CONCURRENCY = 5
+const BAR_WIDTH = 24
+
+const progressBar = (done: number, total: number): string => {
+  const filled = total === 0 ? BAR_WIDTH : Math.round((done / total) * BAR_WIDTH)
+  return `▐${"█".repeat(filled)}${"░".repeat(BAR_WIDTH - filled)}▌ ${done}/${total}`
+}
 
 const DomainName = Schema.String.pipe(
   Schema.check(Schema.isPattern(/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?\.?$/i, {
@@ -152,7 +158,7 @@ const sweep = Effect.fn(function*(
         Effect.tap(() =>
           Effect.sync(() => {
             done += batch.length
-            if (showProgress) process.stderr.write(`\rchecking ${done}/${targets.length}…`)
+            if (showProgress) process.stderr.write(`\r  ${progressBar(done, targets.length)}`)
           })
         )
       ),

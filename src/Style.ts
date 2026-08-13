@@ -12,6 +12,7 @@ export interface Style {
   readonly green: (text: string) => string
   readonly red: (text: string) => string
   readonly yellow: (text: string) => string
+  readonly orange: (text: string) => string
   readonly dim: (text: string) => string
   readonly bold: (text: string) => string
   /** OSC 8 terminal hyperlink; plain style returns the text untouched. */
@@ -25,6 +26,7 @@ export const colored: Style = {
   green: paint("32"),
   red: paint("31"),
   yellow: paint("33"),
+  orange: paint("38;5;208"),
   dim: paint("2"),
   bold: paint("1"),
   link: (text, url) => `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`
@@ -34,6 +36,7 @@ export const plain: Style = {
   green: identity,
   red: identity,
   yellow: identity,
+  orange: identity,
   dim: identity,
   bold: identity,
   link: identity

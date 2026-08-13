@@ -9,8 +9,14 @@ import { Cloudflare } from "./Cloudflare.ts"
 import { CredentialStore, type Credentials } from "./Credentials.ts"
 import { Style } from "./Style.ts"
 
-const intro = ({ bold, dim }: Style) => `
-${bold("cf-domain-search setup")} — this takes about two minutes and runs once.
+const intro = ({ bold, dim, orange }: Style) => `
+${orange("        ▄▄▄▄▄")}
+${orange("    ▄▄█████████▄▄")}            ${bold("cfdomains")}
+${orange("  ▄███████████████▄▄▄")}        ${dim("Cloudflare Registrar domain search")}
+${orange(" ▟█████████████████████▙")}
+${orange(" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀")}
+
+${bold("Setup")} — this takes about two minutes and runs once.
 
 The tool checks domain availability through Cloudflare's Registrar API, which
 needs an API token from your (free) Cloudflare account:
