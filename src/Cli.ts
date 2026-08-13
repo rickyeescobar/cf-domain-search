@@ -210,7 +210,8 @@ const check = Effect.fn(function*(input: {
       name: query,
       availableOnly: input.available,
       accountId: credentials.accountId,
-      links: input.links
+      links: input.links,
+      columns: process.stdout.columns ?? 80
     }, style))
   }
   if (failures.length > 0) {

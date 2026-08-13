@@ -55,9 +55,10 @@ const sparkline = (costs: ReadonlyArray<number>, buckets = 12): string => {
 /** Rounded box; padding is computed from the unstyled text so ANSI codes don't skew it. */
 const box = (
   content: ReadonlyArray<{ readonly plain: string; readonly styled: string }>,
-  frame: (line: string) => string
+  frame: (line: string) => string,
+  minInner: number
 ): ReadonlyArray<string> => {
-  const inner = Math.max(...content.map((l) => l.plain.length))
+  const inner = Math.max(minInner, ...content.map((l) => l.plain.length))
   return [
     frame(`╭${"─".repeat(inner + 2)}╮`),
     ...content.map((l) =>
@@ -88,6 +89,8 @@ export const render = (
     readonly availableOnly: boolean
     readonly accountId: string
     readonly links: boolean
+    /** Terminal width; the summary box stretches to fill it. */
+    readonly columns: number
   },
   style: Style
 ): string => {
@@ -202,7 +205,7 @@ export const render = (
     })
   }
   lines.push("")
-  lines.push(...box(summary, dim))
+  lines.push(...box(summary, dim, options.columns - 4))
   lines.push(dim(`buy: ${purchaseUrl(options.accountId, options.name)}`))
 
   return lines.join("\n")

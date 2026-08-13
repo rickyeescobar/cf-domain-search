@@ -17,6 +17,13 @@ interface Shot {
   readonly code: string
 }
 
+// The summary receipt box stretches to the terminal width (80 columns here).
+const receiptBox = (lines: ReadonlyArray<string>): ReadonlyArray<string> => [
+  `╭${"─".repeat(78)}╮`,
+  ...lines.map((line) => `│ ${line.padEnd(76)} │`),
+  `╰${"─".repeat(78)}╯`
+]
+
 const shots: ReadonlyArray<Shot> = [
   {
     file: "docs/fullsweep.png",
@@ -43,11 +50,11 @@ const shots: ReadonlyArray<Shot> = [
       "Not supported via API (6) — may still be purchasable in the dashboard",
       "  · malachi.cc  malachi.giving  malachi.lol  malachi.mom  malachi.new  malachi.sh",
       "",
-      "╭──────────────────────────────────────────╮",
-      "│ 343 available · 74 taken · 6 unsupported │",
-      "│ cheapest: malachi.bid at $4.18/yr        │",
-      "│ prices $4.18 – $2,000.20  ▂▂▃█▅▃▂▁▂▂▁▂   │",
-      "╰──────────────────────────────────────────╯"
+      ...receiptBox([
+        "343 available · 74 taken · 6 unsupported",
+        "cheapest: malachi.bid at $4.18/yr",
+        "prices $4.18 – $2,000.20  ▂▂▃█▅▃▂▁▂▂▁▂"
+      ])
     ].join("\n")
   },
   {
@@ -67,10 +74,10 @@ const shots: ReadonlyArray<Shot> = [
       "Taken (4)",
       "  ✘ malachi.app  malachi.com  malachi.dev  malachi.io",
       "",
-      "╭───────────────────────────────────────╮",
-      "│ 5 available · 4 taken · 0 unsupported │",
-      "│ cheapest: malachi.day at $10.20/yr    │",
-      "╰───────────────────────────────────────╯"
+      ...receiptBox([
+        "5 available · 4 taken · 0 unsupported",
+        "cheapest: malachi.day at $10.20/yr"
+      ])
     ].join("\n")
   },
   {
