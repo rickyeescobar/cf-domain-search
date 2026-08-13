@@ -1,5 +1,7 @@
 # cf-domain-search
 
+[![CI](https://github.com/rickyeescobar/cf-domain-search/actions/workflows/ci.yml/badge.svg)](https://github.com/rickyeescobar/cf-domain-search/actions/workflows/ci.yml)
+
 Find out which `yourname.<tld>` domains are actually available — and what they really
 cost — across all 423 [Cloudflare Registrar](https://developers.cloudflare.com/registrar/registrar-api/)
 TLDs, in one command.
