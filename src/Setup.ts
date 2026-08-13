@@ -10,11 +10,11 @@ import { CredentialStore, type Credentials } from "./Credentials.ts"
 import { Style } from "./Style.ts"
 
 const intro = ({ bold, dim, orange }: Style) => `
-${orange("        ▄▄▄▄▄")}
-${orange("    ▄▄█████████▄▄")}
-${orange("  ▄███████████████▄▄▄")}        ${dim("Cloudflare Registrar domain search")}
-${orange(" ▟█████")} ${bold("cfdomains")} ${orange("█████▙")}
-${orange(" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀")}
+${orange("       ▄▄▄▄▄▄▄")}
+${orange("    ▄█▀▀     ▀▀█▄▄▄▄▄")}
+${orange("  ▄█▀              ▀▀█▄")}      ${dim("Cloudflare Registrar domain search")}
+${orange(" ▐█")}    ${bold("cfdomains")}     ${orange("█▌")}
+${orange("  ▀█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█▀")}
 
 ${bold("Setup")}
 
